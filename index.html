@@ -285,6 +285,8 @@
   .savebar::-webkit-scrollbar{display:none;}
   .savebar .btn{flex:0 0 auto;white-space:nowrap;}
   .savebar .btn-sm{padding:9px 18px;}
+  .sync-status{font-size:15px;line-height:1;display:inline-flex;align-items:center;margin-right:2px;}
+  #manualBtns{display:none;align-items:center;gap:7px;}
   .tiny{font-size:12px;color:var(--ink-faint);}
   input[type=file]{display:none;}
 </style>
@@ -421,8 +423,12 @@
 </main>
 
 <div class="savebar">
-  <button class="btn btn-gold btn-sm" onclick="cloudSave()">☁︎ 클라우드 저장</button>
-  <button class="btn btn-gold btn-sm" onclick="cloudLoad()">☁︎ 불러오기</button>
+  <span class="sync-status"><span id="syncDot">●</span></span>
+  <button class="btn btn-line btn-sm" id="autoToggle" onclick="toggleAutoSync()" title="자동/수동 전환">🔄 자동</button>
+  <span id="manualBtns" style="display:none;gap:7px;">
+    <button class="btn btn-gold btn-sm" onclick="cloudSave()">☁︎ 저장</button>
+    <button class="btn btn-gold btn-sm" onclick="cloudLoad()">☁︎ 불러오기</button>
+  </span>
 </div>
 <div class="copy-toast" id="toast">복사되었습니다</div>
 
@@ -568,6 +574,7 @@ function save(){
   saveTimer=setTimeout(()=>{
     localStorage.setItem("gongyang_v3",JSON.stringify(STORE));
   },400);
+  if(typeof scheduleAutoSave==="function")scheduleAutoSave();
 }
 function E(){return STORE.events[STORE.active];}
 
@@ -1508,6 +1515,74 @@ setTimeout(updateTabOverflow,100);
 
 /* ===== 클라우드 동기화 (Google Apps Script) ===== */
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbybTlwXiotibUUWi5Bmab2jAo5MeBZSt3tWH-kN7AClZ46oNaLEjj4FEt6TrBeAwMw/exec";
+
+/* ===== 자동 동기화 ===== */
+function autoSyncOn(){return localStorage.getItem("gongyang_autosync")!=="off";}
+function setAutoSync(on){localStorage.setItem("gongyang_autosync",on?"on":"off");updateSyncUI();showToast(on?"자동 동기화 켜짐":"자동 동기화 꺼짐 (수동 버튼 사용)");if(on)autoLoadOnOpen(true);}
+let autoSaveTimer=null;
+let lastSavedPayload="";
+let cloudBusy=false;
+async function cloudSaveQuiet(){
+  if(!CLOUD_URL||cloudBusy)return;
+  const payload=JSON.stringify(STORE);
+  if(payload===lastSavedPayload)return;
+  cloudBusy=true;setSyncDot("saving");
+  try{
+    await fetch(CLOUD_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:payload});
+    lastSavedPayload=payload;setSyncDot("ok");
+  }catch(e){setSyncDot("err");}
+  finally{cloudBusy=false;}
+}
+function scheduleAutoSave(){
+  if(!autoSyncOn())return;
+  clearTimeout(autoSaveTimer);setSyncDot("pending");
+  autoSaveTimer=setTimeout(()=>{cloudSaveQuiet();},2500);
+}
+async function autoLoadOnOpen(force){
+  if(!autoSyncOn()&&!force)return;
+  if(!CLOUD_URL)return;
+  cloudBusy=true;setSyncDot("loading");
+  try{
+    const res=await fetch(CLOUD_URL+"?t="+Date.now(),{method:"GET"});
+    const text=await res.text();
+    if(text&&text.trim()){
+      const s=JSON.parse(text);
+      if(s.events&&s.events.length){
+        const cur=JSON.stringify(STORE);
+        if(JSON.stringify(s)!==cur){
+          STORE=s;if(!STORE.pantry)STORE.pantry={};migratePantry(STORE);STORE.events.forEach(migrateEvent);
+          STORE.active=Math.min(STORE.active||0,STORE.events.length-1);
+          localStorage.setItem("gongyang_v3",JSON.stringify(STORE));
+          selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();
+        }
+        lastSavedPayload=JSON.stringify(STORE);setSyncDot("ok");
+      }
+    }else{setSyncDot("ok");}
+  }catch(e){setSyncDot("err");}
+  finally{cloudBusy=false;}
+}
+function flushSaveOnLeave(){
+  if(!autoSyncOn())return;
+  const payload=JSON.stringify(STORE);
+  if(payload===lastSavedPayload)return;
+  try{
+    const blob=new Blob([payload],{type:"text/plain;charset=utf-8"});
+    if(navigator.sendBeacon){navigator.sendBeacon(CLOUD_URL,blob);lastSavedPayload=payload;}
+    else{cloudSaveQuiet();}
+  }catch(e){}
+}
+function setSyncDot(state){
+  const d=document.getElementById("syncDot");if(!d)return;
+  const map={ok:["●","저장됨","var(--green)"],saving:["●","저장 중","var(--gold)"],pending:["●","곧 저장","var(--gold-soft)"],loading:["●","불러오는 중","var(--gold)"],err:["●","연결 확인","#c0603a"]};
+  const m=map[state]||map.ok;d.textContent=m[0];d.style.color=m[2];d.title=m[1];
+}
+function updateSyncUI(){
+  const on=autoSyncOn();
+  const t=document.getElementById("autoToggle");if(t)t.textContent=on?"🔄 자동":"✋ 수동";
+  const bar=document.getElementById("manualBtns");if(bar)bar.style.display=on?"none":"flex";
+  const dot=document.getElementById("syncDot");if(dot)dot.style.display=on?"inline":"none";
+}
+function toggleAutoSync(){setAutoSync(!autoSyncOn());}
 async function cloudSave(){
   if(!CLOUD_URL){showToast("클라우드 주소가 없습니다");return;}
   showToast("클라우드에 저장 중…");
@@ -1584,6 +1659,22 @@ document.addEventListener("keydown",e=>{
 function renderAll(){renderEventSelect();initCtx();renderChecks();renderAssign();recalc();renderBuy();renderPantry();renderNotices();renderReceipts();renderMemoTags();renderMemos();applyLock();}
 (function(){const mi=$("memoInput");if(mi)mi.addEventListener("keydown",memoAutoBullet);})();
 renderAll();
+
+/* ===== 자동 동기화 시작 ===== */
+updateSyncUI();
+// 열 때 클라우드에서 최신본 자동 불러오기
+autoLoadOnOpen();
+// 탭 숨김(다른 앱 전환)·닫기 직전에 저장
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushSaveOnLeave();});
+window.addEventListener("pagehide",flushSaveOnLeave);
+window.addEventListener("beforeunload",flushSaveOnLeave);
+// 다시 화면으로 돌아왔을 때: 로컬 변경분을 먼저 올린 뒤에만 최신본 확인 (내 작업 덮어쓰기 방지)
+document.addEventListener("visibilitychange",async()=>{
+  if(document.visibilityState==="visible"&&autoSyncOn()){
+    if(JSON.stringify(STORE)!==lastSavedPayload){await cloudSaveQuiet();}
+    else{autoLoadOnOpen();}
+  }
+});
 </script>
 </body>
 </html>
