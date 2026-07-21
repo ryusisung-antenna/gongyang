@@ -658,7 +658,9 @@
       <h3>품목 내역</h3>
       <div id="receiptList"></div>
       <div class="add-row"><button class="btn btn-gold" onclick="addReceipt()" style="width:100%">＋ 품목 추가</button></div>
-      <div class="discount-row"><label>할인</label><input type="text" inputmode="numeric" id="discount" value="0" oninput="liveComma(this);renderReceiptTotal()"><span class="tiny">원 차감</span></div>
+      <h3 style="margin-top:18px">할인 내역</h3>
+      <div id="discountList"></div>
+      <div class="add-row"><button class="btn btn-line" onclick="addDiscount()" style="width:100%">＋ 할인 추가</button></div>
       <div class="total-box sub"><span class="label">소계</span><span class="amount" id="receiptSub">0 원</span></div>
       <div class="total-box"><span class="label">총 합산</span><span class="amount" id="receiptTotal">0 원</span></div>
       <button class="btn btn-gold" onclick="exportReceiptImage()" style="width:100%;margin-top:10px">🖼 이미지로 저장</button>
@@ -2247,13 +2249,38 @@ function renderReceipts(){
   const e=E();const el=$("receiptList");el.innerHTML="";
   e.receipts.forEach((r,i)=>{
     const row=document.createElement("div");row.className="receipt-row";
-    row.innerHTML=`<input class="r-name" value="${esc(r.name)}" placeholder="예: 고추 - 200g" onchange="E().receipts[${i}].name=this.value;save();">
-      <input class="r-price" type="text" inputmode="numeric" value="${r.price?(+r.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setReceiptPrice(${i},this.value)">
+    row.innerHTML=`<input class="r-name" lang="ko" value="${esc(r.name)}" placeholder="예: 고추 - 200g" onchange="E().receipts[${i}].name=this.value;save();">
+      <input class="r-price" type="text" inputmode="numeric" value="${r.price?(+r.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setReceiptPrice(${i},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addReceipt();}">
       <button class="check-del" onclick="delReceipt(${i})">✕</button>`;
     el.appendChild(row);
   });
-  $("discount").value=e.discount?(+e.discount).toLocaleString('ko-KR'):0;renderReceiptTotal();
+  renderDiscounts();
 }
+function focusLastRow_(containerId){
+  const rows=document.querySelectorAll(`#${containerId} .r-name`);
+  const last=rows[rows.length-1];
+  if(last)last.focus();
+}
+function ensureDiscounts(e){
+  if(!Array.isArray(e.discounts)){
+    e.discounts=e.discount?[{name:"할인",price:+e.discount||0}]:[]; // 예전 단일 금액 방식 마이그레이션
+  }
+  return e.discounts;
+}
+function renderDiscounts(){
+  const e=E();const list=ensureDiscounts(e);const el=$("discountList");el.innerHTML="";
+  list.forEach((d,i)=>{
+    const row=document.createElement("div");row.className="receipt-row";
+    row.innerHTML=`<input class="r-name" lang="ko" value="${esc(d.name)}" placeholder="예: 단골 할인" onchange="ensureDiscounts(E())[${i}].name=this.value;save();">
+      <input class="r-price" type="text" inputmode="numeric" value="${d.price?(+d.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setDiscountPrice(${i},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addDiscount();}">
+      <button class="check-del" onclick="delDiscount(${i})">✕</button>`;
+    el.appendChild(row);
+  });
+  renderReceiptTotal();
+}
+function setDiscountPrice(i,val){ensureDiscounts(E())[i].price=+String(val).replace(/[^0-9.]/g,'')||0;renderReceiptTotal();save();}
+function addDiscount(){ensureDiscounts(E()).push({name:"",price:0});renderDiscounts();focusLastRow_("discountList");}
+function delDiscount(i){ensureDiscounts(E()).splice(i,1);renderDiscounts();save();}
 // 입력하는 동안 실시간으로 3자리 콤마 적용
 function liveComma(input){
   const digits=input.value.replace(/[^0-9]/g,'');
@@ -2261,14 +2288,15 @@ function liveComma(input){
   const len=input.value.length;try{input.setSelectionRange(len,len);}catch(e){}
 }
 function renderReceiptTotal(){
-  const e=E();e.discount=+String($("discount").value).replace(/[^0-9.]/g,'')||0;
-  const sub=e.receipts.reduce((s,r)=>s+(+r.price||0),0);const total=sub-e.discount;
+  const e=E();
+  const discountSum=ensureDiscounts(e).reduce((s,d)=>s+(+d.price||0),0);
+  const sub=e.receipts.reduce((s,r)=>s+(+r.price||0),0);const total=sub-discountSum;
   $("receiptSub").textContent=sub.toLocaleString('ko-KR')+" 원";
   $("receiptTotal").textContent=total.toLocaleString('ko-KR')+" 원";
   save();
 }
 function setReceiptPrice(i,val){E().receipts[i].price=+String(val).replace(/[^0-9.]/g,'')||0;renderReceiptTotal();save();}
-function addReceipt(){E().receipts.push({name:"",price:0});renderReceipts();}
+function addReceipt(){E().receipts.push({name:"",price:0});renderReceipts();focusLastRow_("receiptList");}
 function delReceipt(i){E().receipts.splice(i,1);renderReceipts();renderReceiptTotal();}
 
 /* ===== 정산 이미지 출력 ===== */
@@ -2288,12 +2316,14 @@ function loadHtml2Canvas(){
 function buildAndExportReceiptImage(){
   const e=E();
   const sub=e.receipts.reduce((s,r)=>s+(+r.price||0),0);
-  const discount=+e.discount||0;const total=sub-discount;
+  const discounts=ensureDiscounts(e).filter(d=>d.name||d.price);
+  const discountSum=discounts.reduce((s,d)=>s+(+d.price||0),0);const total=sub-discountSum;
   const rows=e.receipts.filter(r=>r.name||r.price);
   if(!rows.length){showToast("입력된 품목이 없습니다");return;}
   const wrap=document.createElement("div");
   wrap.style.cssText="position:fixed;left:-9999px;top:0;width:520px;background:#fff;font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:#111;";
   const rowHtml=rows.map(r=>`<tr><td style="padding:12px 16px;border-bottom:1px solid #ddd;font-size:17px;">${escHtml(r.name||"")}</td><td style="padding:12px 16px;border-bottom:1px solid #ddd;font-size:17px;text-align:right;">${(+r.price||0).toLocaleString('ko-KR')}</td></tr>`).join("");
+  const discountRowHtml=discounts.map(d=>`<tr><td style="padding:12px 16px;border-bottom:1px solid #ddd;font-size:16px;">${escHtml(d.name||"할인")}</td><td style="padding:12px 16px;border-bottom:1px solid #ddd;text-align:right;font-size:16px;">-${(+d.price||0).toLocaleString('ko-KR')}</td></tr>`).join("");
   wrap.innerHTML=`
     <table style="width:100%;border-collapse:collapse;">
       <thead><tr>
@@ -2303,7 +2333,7 @@ function buildAndExportReceiptImage(){
       <tbody>
         ${rowHtml}
         <tr><td style="padding:12px 16px;background:#ffe9a8;font-size:17px;font-weight:700;color:#8a5a00;">소계</td><td style="padding:12px 16px;background:#ffe9a8;text-align:right;font-size:17px;font-weight:700;color:#8a5a00;">${sub.toLocaleString('ko-KR')}</td></tr>
-        ${discount?`<tr><td style="padding:12px 16px;border-bottom:1px solid #ddd;font-size:16px;">할인</td><td style="padding:12px 16px;border-bottom:1px solid #ddd;text-align:right;font-size:16px;">-${discount.toLocaleString('ko-KR')}</td></tr>`:""}
+        ${discountRowHtml}
         <tr><td style="padding:16px;background:#ffb03a;font-size:20px;font-weight:800;color:#111;">총합</td><td style="padding:16px;background:#ffb03a;text-align:right;font-size:20px;font-weight:800;color:#111;">${total.toLocaleString('ko-KR')}</td></tr>
       </tbody>
     </table>`;
