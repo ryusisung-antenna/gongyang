@@ -1111,6 +1111,9 @@ function setUnitForItem(name,newUnit){
 }
 
 function $(id){return document.getElementById(id);}
+// PC 크롬에서 inputmode="numeric"이 IME를 영어로 강제 전환하는 문제가 있어, 모바일(터치 기기)에서만 적용
+const IS_TOUCH = window.matchMedia && window.matchMedia("(hover:none) and (pointer:coarse)").matches;
+const NUM_MODE = IS_TOUCH ? 'inputmode="numeric"' : '';
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 /* ===== 선 아이콘 세트 ===== */
 const ICONS = {
@@ -1289,7 +1292,7 @@ function renderChecks(){
       const hc=document.createElement("div");hc.className="check-special headcount";
       const keys=["군장병","공양바라지","청년바라지","보리수","기타"];
       let sum=0;keys.forEach(k=>sum+=+c.head[k]||0);
-      hc.innerHTML=keys.map(k=>`<div class="hc-row"><label>${k}</label><input type="number" inputmode="numeric" value="${c.head[k]||''}" placeholder="0" onchange="setHead(${i},'${k}',this.value)"><span>명</span></div>`).join("")
+      hc.innerHTML=keys.map(k=>`<div class="hc-row"><label>${k}</label><input type="number" ${NUM_MODE} value="${c.head[k]||''}" placeholder="0" onchange="setHead(${i},'${k}',this.value)"><span>명</span></div>`).join("")
         +`<div class="hc-total"><label>합계</label><span class="hc-sum">${sum}</span><span>명 → 총 공양인원 자동 반영</span></div>`;
       wrap.appendChild(hc);
     }
@@ -2250,7 +2253,7 @@ function renderReceipts(){
   e.receipts.forEach((r,i)=>{
     const row=document.createElement("div");row.className="receipt-row";
     row.innerHTML=`<input class="r-name" lang="ko" value="${esc(r.name)}" placeholder="예: 고추 - 200g" onchange="E().receipts[${i}].name=this.value;save();">
-      <input class="r-price" type="text" inputmode="numeric" value="${r.price?(+r.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setReceiptPrice(${i},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addReceipt();}">
+      <input class="r-price" type="text" ${NUM_MODE} value="${r.price?(+r.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setReceiptPrice(${i},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addReceipt();}">
       <button class="check-del" onclick="delReceipt(${i})">✕</button>`;
     el.appendChild(row);
   });
@@ -2272,7 +2275,7 @@ function renderDiscounts(){
   list.forEach((d,i)=>{
     const row=document.createElement("div");row.className="receipt-row";
     row.innerHTML=`<input class="r-name" lang="ko" value="${esc(d.name)}" placeholder="예: 단골 할인" onchange="ensureDiscounts(E())[${i}].name=this.value;save();">
-      <input class="r-price" type="text" inputmode="numeric" value="${d.price?(+d.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setDiscountPrice(${i},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addDiscount();}">
+      <input class="r-price" type="text" ${NUM_MODE} value="${d.price?(+d.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="liveComma(this)" onchange="setDiscountPrice(${i},this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addDiscount();}">
       <button class="check-del" onclick="delDiscount(${i})">✕</button>`;
     el.appendChild(row);
   });
