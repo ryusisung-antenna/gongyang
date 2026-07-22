@@ -7,18 +7,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <style>
   :root{
-    --bg:#FAF9F5; --bg-deep:#F3F2ED; --panel:#F3F2ED; --panel-2:#EAE8DD;
-    --ink:#20211D; --ink-soft:#8A8A7E; --ink-faint:#ABA99B;
-    --line:#E4E2D8; --line-soft:#ECEAE0;
-    --gold:#7A5C2E; --gold-soft:#9C7D46; --clay:#A24B3C;
-    --red:#A24B3C; --blue:#3E6C8C; --green:#5C7A5A;
-    --danger:#A24B3C;
-    --shadow:none; --shadow-lg:none;
-    --display:'Noto Serif KR',serif; --serif:'Noto Serif KR',serif; --sans:'Pretendard',-apple-system,system-ui,sans-serif;
+    --bg:#FBF8F1; --bg-deep:#F4EFE4; --panel:#F4EFE4; --panel-2:#EFE7D6;
+    --paper:#FBF8F1; --card:#FFFFFF;
+    --ink:#3A352E; --ink-soft:#7A7263; --ink-faint:#A99F8C;
+    --line:#E6DECF; --line-soft:#EFE9DC;
+    --gold:#B08A3E; --gold-soft:#C2A05A; --clay:#C77E4E;
+    --red:#C0745A; --blue:#5FA9D6; --green:#8FB04E; --green-deep:#6E8C3A;
+    --lilac:#C9B6DC; --lilac-deep:#9B7FB8; --sky:#5FA9D6; --sun:#F4C430;
+    --danger:#C0745A;
+    --shadow:0 1px 2px rgba(58,53,46,.04),0 10px 30px rgba(58,53,46,.06); --shadow-lg:0 8px 30px rgba(58,53,46,.10);
+    --display:'Gowun Batang',serif; --serif:'Gowun Batang',serif; --sans:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Noto Sans KR',sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   /* 숫자 입력칸의 위아래 화살표(스피너) 제거 — PC에서 그 화살표가 폭을 차지해 숫자가 잘리던 문제 해결 */
@@ -56,11 +59,15 @@
   .ctx .synctail{margin-left:auto;align-items:center;gap:6px;}
   /* 하단 고정 탭바 */
   #bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:700px;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:50;}
-  #bottomNav .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px 2px;color:var(--ink-faint);font-family:var(--sans);}
-  #bottomNav .tab .ico{font-size:19px;line-height:1;}
+  #bottomNav .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px 2px;color:var(--ink-soft);font-family:var(--sans);}
+  #bottomNav .tab .ic{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;transition:transform .2s ease;}
   #bottomNav .tab .lbl{font-size:10px;letter-spacing:-.2px;font-weight:500;}
-  #bottomNav .tab.active{color:var(--gold);}
+  #bottomNav .tab.active{color:var(--ink);}
+  #bottomNav .tab.active .ic{transform:translateY(-2px) scale(1.08);filter:saturate(1.15);}
   #bottomNav .tab.active .lbl{font-weight:700;}
+  .blob-a{border-radius:46% 54% 58% 42% / 48% 44% 56% 52%;background:#E8E0F0;color:#7A5FA6;}
+  .blob-b{border-radius:52% 48% 44% 56% / 42% 58% 46% 54%;background:#F3E4D6;color:#B5713F;}
+  .blob-c{border-radius:44% 56% 52% 48% / 56% 42% 58% 44%;background:#EAF0DD;color:#6E8C3A;}
   /* 홈 — 지금 상황판 */
   .home-stage-label{font-family:var(--serif);font-size:12.5px;font-weight:600;color:var(--gold-soft);margin:18px 2px 8px;}
   .home-stage-label:first-child{margin-top:2px;}
@@ -72,20 +79,19 @@
   .home-card-title{font-family:var(--serif);font-weight:600;font-size:14px;color:var(--ink);margin-top:2px;}
   .home-card-stat{font-size:12px;color:var(--ink-faint);}
   .home-card.warn .home-card-stat{color:var(--gold-soft);}
-  /* 원형 타임라인 — 준비/진행/평가 과정 흐름 */
-  .flow-timeline{position:relative;margin-top:4px;}
-  .flow-step{position:relative;display:flex;gap:11px;padding-bottom:20px;}
-  .flow-step:not(:last-child)::after{content:"";position:absolute;left:8px;top:23px;bottom:0;width:1px;background:var(--line);}
-  .flow-check{flex:none;width:17px;height:17px;margin-top:2px;border:1.4px solid #C7C4B4;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);}
-  .flow-check svg{width:11px;height:11px;opacity:0;}
-  .flow-step.done .flow-check{background:var(--ink);border-color:var(--ink);}
+  /* 카드형 체크리스트 — 준비/진행/평가 과정 흐름 (시안 A) */
+  .flow-timeline{position:relative;margin-top:8px;}
+  .flow-step{position:relative;display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);}
+  .flow-check{flex:none;width:20px;height:20px;margin-top:1px;border:1.6px solid #CFC7B5;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);}
+  .flow-check svg{width:12px;height:12px;opacity:0;}
+  .flow-step.done .flow-check{background:var(--green-deep);border-color:var(--green-deep);}
   .flow-step.done .flow-check svg{opacity:1;}
   .flow-step-body{flex:1;min-width:0;cursor:pointer;}
-  .flow-step.done .flow-step-title{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--line);}
-  .flow-step-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px;}
+  .flow-step.done .flow-step-title{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:var(--line);}
+  .flow-step-title{font-family:var(--serif);font-size:14.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;}
   .flow-step-title .ext-badge{font-size:10px;font-weight:500;color:var(--ink-faint);border:1px solid var(--line);border-radius:20px;padding:1px 8px;font-family:var(--sans);}
-  .flow-step-desc{font-size:13px;color:var(--ink-soft);margin-top:4px;line-height:1.55;}
-  .flow-step-extra{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;font-size:13.5px;line-height:1.7;color:var(--ink);cursor:default;}
+  .flow-step-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.55;}
+  .flow-step-extra{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.7;color:var(--ink);cursor:default;}
   .flow-step-extra.hidden{display:none;}
   .flow-substage{font-family:var(--serif);font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.06em;margin:22px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
   .flow-substage:first-child{margin-top:2px;}
@@ -143,7 +149,7 @@
   /* 웹자보 */
   .promo-preview{border:1px solid var(--line);border-radius:6px;overflow:hidden;height:480px;background:#fff;}
   /* 신청현황 */
-  .app-card{border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-bottom:8px;background:var(--panel);}
+  .app-card{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:8px;background:var(--card);box-shadow:var(--shadow);}
   .app-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
   .app-name{font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--ink);}
   .app-phone{font-size:12px;color:var(--ink-soft);}
@@ -173,8 +179,8 @@
   .mini-check-add{margin-top:8px;}
   .mini-check-add input{width:100%;border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:5px;padding:7px 9px;font-size:12.5px;font-family:var(--sans);}
   /* 기초정보 강조 카드 */
-  .flow-step.highlight .flow-step-body{background:var(--panel);border:1px solid var(--gold-soft);border-radius:8px;padding:12px 14px;margin:-4px 0;}
-  .flow-step.highlight .flow-step-title{color:var(--gold);}
+  .flow-step.highlight{background:rgba(143,176,78,.10);border-color:var(--green);}
+  .flow-step.highlight .flow-step-title{color:var(--green-deep);}
   /* 요리별 재료 분류 */
   .dish-group-block{margin-bottom:14px;}
   .dish-group-block:last-child{margin-bottom:0;}
@@ -202,9 +208,14 @@
   .panel{display:none;animation:fade .3s ease;}
   .panel.active{display:block;}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-  .section-head{font-family:var(--serif);font-weight:600;font-size:18px;margin:2px 0 4px;display:flex;align-items:center;gap:8px;color:var(--ink);}
+  .section-head{font-family:var(--serif);font-weight:600;font-size:18px;margin:2px 0 4px;display:flex;align-items:center;gap:9px;color:var(--ink);}
+  .section-head .sec-blob{flex:none;width:30px;height:30px;border-radius:44% 56% 52% 48% / 56% 42% 58% 44%;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .sec-blob.bl-lilac{background:#E8E0F0;color:#7A5FA6;}
+  .sec-blob.bl-moss{background:#EAF0DD;color:#6E8C3A;}
+  .sec-blob.bl-clay{background:#F3E4D6;color:#B5713F;}
+  .sec-blob.bl-sky{background:#E0EDF6;color:#3F7CA0;}
   .section-desc{color:var(--ink-faint);font-size:12.5px;margin-bottom:16px;line-height:1.55;}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
   .card h3{font-family:var(--serif);font-weight:600;font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:7px;color:var(--gold-soft);}
   /* 체크리스트 */
   .progress-bar{height:8px;background:var(--bg-deep);border:1px solid var(--line);border-radius:0;overflow:hidden;}
@@ -272,14 +283,14 @@
   .add-row input{flex:1;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:var(--sans);font-size:14px;background:var(--bg-deep);color:var(--ink);}
   .add-row input:focus{outline:none;border-color:var(--gold);}
   .add-row input::placeholder{color:var(--ink-faint);}
-  .btn{border:none;border-radius:8px;padding:9px 15px;cursor:pointer;font-family:var(--sans);font-size:13.5px;font-weight:500;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
-  .btn-gold{background:var(--gold);color:var(--bg-deep);font-weight:700;} .btn-gold:active{background:var(--gold-soft);}
-  .btn-line{background:transparent;color:var(--ink-soft);border:1px solid var(--line);} .btn-line:active{background:var(--panel-2);}
+  .btn{border:none;border-radius:10px;padding:9px 15px;cursor:pointer;font-family:var(--sans);font-size:13.5px;font-weight:500;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-gold{background:var(--green-deep);color:#fff;font-weight:700;} .btn-gold:active{background:var(--green);}
+  .btn-line{background:var(--card);color:var(--ink-soft);border:1px solid var(--line);} .btn-line:active{background:var(--panel-2);}
   .btn-sm{padding:6px 11px;font-size:12.5px;}
   /* 일감 */
   .people-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:20px;}
-  .person-chip{background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:6px 12px;font-size:13.5px;cursor:grab;user-select:none;transition:.15s;display:inline-flex;align-items:center;gap:7px;touch-action:none;}
-  .person-chip.selected{background:var(--gold);color:var(--bg-deep);border-color:var(--gold);font-weight:700;}
+  .person-chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13.5px;cursor:grab;user-select:none;transition:.15s;display:inline-flex;align-items:center;gap:7px;touch-action:none;}
+  .person-chip.selected{background:var(--green-deep);color:#fff;border-color:var(--green-deep);font-weight:700;}
   .person-chip.unassigned{background:transparent;border:1px solid var(--danger);color:var(--danger);}
   .person-chip.unassigned .dotmark{width:7px;height:7px;border-radius:50%;background:var(--danger);display:inline-block;margin-right:1px;}
   /* 잠금(편집모드) */
@@ -334,7 +345,7 @@
   .ing-buy.zero{color:var(--ink-faint);font-weight:400;font-size:10px;}
   .ing-buy .surplus{display:block;font-size:9px;color:var(--green);white-space:nowrap;}
   .ing-buy .stocknote{display:block;font-size:9px;color:var(--ink-faint);font-weight:400;white-space:nowrap;}
-  .person-chip .cnt{background:var(--gold);color:var(--bg-deep);border-radius:50%;min-width:17px;height:17px;font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 3px;}
+  .person-chip .cnt{background:var(--green-deep);color:#fff;border-radius:50%;min-width:17px;height:17px;font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 3px;}
   .person-chip .mk{border-radius:50%;width:17px;height:17px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
   .person-chip .mk-done{background:var(--green);color:#fff;}
   .person-chip .mk-one{background:transparent;border:1.5px solid var(--ink-faint);color:var(--ink-soft);}
@@ -517,12 +528,12 @@
     <div id="runTimeline"></div>
   </section>
   <section class="panel" id="panel-stage-eval">
-    <div class="section-head">📝 평가과정</div>
+    <div class="section-head"><span class="sec-blob bl-clay"><i class="ti ti-notes"></i></span>평가과정</div>
     <div class="section-desc">행사가 끝난 뒤, 나누고 정리하고 다음을 준비하는 순서입니다.</div>
     <div id="evalTimeline"></div>
   </section>
   <section class="panel" id="panel-check">
-    <div class="section-head">✓ 준비 체크리스트</div>
+    <div class="section-head"><span class="sec-blob bl-moss"><i class="ti ti-checklist"></i></span>준비 체크리스트</div>
     <div class="section-back"><button class="back-btn" onclick="goBack()">‹ 뒤로</button></div>
     <div class="section-desc">각 항목 아래에 하위 할일(체크) 또는 메모를 추가할 수 있습니다. 하위 체크가 모두 완료되면 상위 항목도 자동으로 완료됩니다. 손잡이(⠿)로 순서를 바꿉니다.</div>
     <div class="card"><div class="progress-bar"><div class="progress-fill" id="progFill"></div></div><div class="progress-label" id="progLabel">0 / 0 완료</div></div>
@@ -608,7 +619,7 @@
 
   <section class="panel" id="panel-pool">
     <div class="section-back"><button class="back-btn" onclick="goBack()">‹ 뒤로</button></div>
-    <div class="section-head">바라지 인력풀</div>
+    <div class="section-head"><span class="sec-blob bl-lilac"><i class="ti ti-users"></i></span>바라지 인력풀</div>
     <div class="section-desc">지금까지 신청하셨던 바라지분들 명단입니다. 모든 행사가 함께 보는 공용 목록입니다. 여러 명을 선택해 표시해두면, 나중에 연락할 명단을 추려두는 데 씁니다.</div>
     <div class="pool-toolbar">
       <input type="text" id="poolSearch" placeholder="이름·지회·연락처로 찾기" oninput="renderPool()">
@@ -630,7 +641,7 @@
 
   <section class="panel" id="panel-promo">
     <div class="section-back"><button class="back-btn" onclick="goBack()">‹ 뒤로</button></div>
-    <div class="section-head">바라지 홍보 웹자보</div>
+    <div class="section-head"><span class="sec-blob bl-sky"><i class="ti ti-photo"></i></span>바라지 홍보 웹자보</div>
     <div class="section-desc">만들고 계신 홍보 웹자보를 여기서 미리 보고 다듬으세요. 코드를 고치고 "미리보기 갱신"을 누르면 아래 화면에 바로 반영됩니다.</div>
     <div class="promo-preview"><iframe id="promoFrame" title="웹자보 미리보기"></iframe></div>
     <button class="btn btn-gold btn-sm" onclick="refreshPromoPreview()" style="width:100%;margin:10px 0">미리보기 갱신</button>
@@ -639,7 +650,7 @@
 
   <section class="panel" id="panel-applications">
     <div class="section-back"><button class="back-btn" onclick="goBack()">‹ 뒤로</button></div>
-    <div class="section-head">모집 현황 파악</div>
+    <div class="section-head"><span class="sec-blob bl-moss"><i class="ti ti-clipboard-check"></i></span>모집 현황 파악</div>
     <div class="section-desc">웹자보로 들어온 신청을 모아서 보여줍니다.</div>
     <div id="appStateBox"></div>
     <div id="appBody" style="display:none">
@@ -681,9 +692,9 @@
 </main>
 
 <nav id="bottomNav">
-  <button class="tab active" data-tab="stage-prep"><span class="ico"><span class="icon" style="width:20px;height:20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c8 0 13-5 13-13 0 0-13 0-13 9 0 2 1 4 1 4Z"/><path d="M5 19c2-4 5-7 9-9"/></svg></span></span><span class="lbl">준비과정</span></button>
-  <button class="tab" data-tab="stage-run"><span class="ico"><span class="icon" style="width:20px;height:20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 8 0 0 1-18 0Z"/><path d="M7 12V8M17 12V8M12 12V6"/></svg></span></span><span class="lbl">진행과정</span></button>
-  <button class="tab" data-tab="stage-eval"><span class="ico"><span class="icon" style="width:20px;height:20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h7M9 16h7"/></svg></span></span><span class="lbl">평가과정</span></button>
+  <button class="tab active" data-tab="stage-prep"><span class="ic blob-a"><i class="ti ti-checklist"></i></span><span class="lbl">준비과정</span></button>
+  <button class="tab" data-tab="stage-run"><span class="ic blob-b"><i class="ti ti-flame"></i></span><span class="lbl">진행과정</span></button>
+  <button class="tab" data-tab="stage-eval"><span class="ic blob-c"><i class="ti ti-notes"></i></span><span class="lbl">평가과정</span></button>
 </nav>
 
 
