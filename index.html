@@ -156,6 +156,28 @@
   .app-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
   .app-sched{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px;}
   .app-tag{font-size:11px;border:1px solid var(--line);border-radius:20px;padding:2px 9px;color:var(--ink);background:var(--bg);}
+  .recruit-summary-group{margin-bottom:14px;}
+  .rs-event{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--green-deep);padding-bottom:8px;border-bottom:2px solid var(--green-deep);margin-bottom:10px;}
+  .rs-mini{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow);}
+  .rs-date{font-family:var(--serif);font-weight:700;font-size:12.5px;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  .rs-total{font-family:var(--sans);font-weight:600;font-size:11px;color:var(--green-deep);}
+  .rs-row{font-size:12px;line-height:1.6;display:flex;gap:6px;}
+  .rs-fold{border:1px dashed var(--green);border-radius:10px;padding:10px 12px;margin-top:10px;}
+  .rs-fold-head{font-size:12px;font-weight:700;color:var(--green-deep);}
+  .rs-fold-body{margin-top:7px;font-size:12px;color:var(--ink-soft);line-height:1.8;}
+  .rs-fold-body.hidden{display:none;}
+  .rs-fold-row b{color:var(--ink);font-weight:600;margin-right:5px;}
+  .rs-fold-row-total{border-top:1px dashed var(--green);margin-top:4px;padding-top:6px;}
+  .rs-fold-row-total b{color:var(--green-deep);}
+  .rs-row b{flex:none;color:var(--clay);font-weight:700;white-space:nowrap;}
+  .rs-row span{color:var(--ink-soft);}
+  .rs-row i{color:var(--ink-faint);font-style:normal;}
+  .rs-name{cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:2px;}
+  .rs-name:active{color:var(--green-deep);}
+  .rs-excluded{border:1px dashed var(--clay);border-radius:10px;padding:10px 12px;margin-top:10px;}
+  .rs-excluded-h{font-size:11px;font-weight:700;color:var(--clay);margin-bottom:6px;}
+  .rs-excluded-row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;padding:3px 0;color:var(--ink-soft);}
+  .rs-excluded-from{font-size:10.5px;color:var(--ink-faint);}
   .app-tag b{color:var(--ink-soft);font-weight:600;margin-right:2px;}
   .app-tag.pending{color:var(--clay);border-color:var(--clay);}
   .app-motive{margin-top:7px;font-size:12px;color:var(--ink-soft);line-height:1.5;}
@@ -171,7 +193,7 @@
   .mini-check-row.done .mini-check{background:var(--ink);border-color:var(--ink);}
   .mini-check-row.done .mini-check svg{opacity:1;}
   .mini-check-text{flex:1;font-size:13px;color:var(--ink);}
-  .mini-check-text-input{flex:1;font-size:13px;color:var(--ink);border:none;background:transparent;font-family:var(--sans);padding:2px 3px;border-radius:4px;min-width:0;}
+  .mini-check-text-input{flex:1;font-size:13px;color:var(--ink);border:none;background:transparent;font-family:var(--sans);padding:2px 3px;border-radius:4px;min-width:0;resize:none;overflow:hidden;line-height:1.55;white-space:pre-wrap;}
   .mini-check-text-input:focus{outline:none;background:var(--panel);}
   .mini-check-row.done .mini-check-text-input{color:var(--ink-faint);text-decoration:line-through;}
   .mini-check-row.done .mini-check-text{color:var(--ink-faint);text-decoration:line-through;}
@@ -189,7 +211,7 @@
   .plain-list li{font-size:12.5px;color:var(--ink-soft);padding-left:12px;position:relative;margin-bottom:4px;}
   .plain-list li::before{content:"";position:absolute;left:0;top:7px;width:3px;height:3px;border-radius:50%;background:var(--ink-faint);}
   /* 인라인 텍스트에어리어 */
-  .inline-textarea{width:100%;min-height:90px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:10px;font-family:var(--sans);font-size:13.5px;line-height:1.6;}
+  .inline-textarea{width:100%;min-height:60px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:10px;font-family:var(--sans);font-size:13.5px;line-height:1.6;resize:none;overflow:hidden;}
   /* 여는모임 진행 편집기 */
   .oc-editor{font-size:13px;line-height:1.75;}
   .oc-editor.editable{outline:1px dashed var(--gold-soft);outline-offset:6px;border-radius:4px;cursor:text;}
@@ -655,6 +677,7 @@
     <div id="appStateBox"></div>
     <div id="appBody" style="display:none">
       <input type="text" id="appSearch" placeholder="이름·전화·지회로 찾기" oninput="renderApplications()" style="width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:9px 11px;font-family:var(--sans);font-size:14px;color:var(--ink);margin-bottom:8px;">
+      <div id="recruitSummaryBox"></div>
       <div id="appDayFilter" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap"></div>
       <div class="section-desc" id="appSummary" style="margin-bottom:8px;"></div>
       <div id="appList"></div>
@@ -699,6 +722,34 @@
 
 
 <div class="copy-toast" id="toast">복사되었습니다</div>
+
+<div class="wizard-overlay" id="rsActionOverlay" onclick="if(event.target===this)closeRsAction()">
+  <div class="wizard-box" style="max-width:420px">
+    <div class="wizard-head"><span id="rsActionName">이름</span></div>
+    <div class="tiny" id="rsActionFrom" style="color:var(--ink-faint);margin-bottom:14px"></div>
+    <div>
+      <label class="tiny" style="color:var(--ink-soft)">다른 자리로 옮기기</label>
+      <select id="rsActionMoveSelect" style="width:100%;margin-top:5px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--sans);"></select>
+      <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="rsActionMove()">여기로 옮기기</button>
+    </div>
+    <button class="btn btn-line" style="width:100%;margin-top:12px" onclick="rsActionExclude()">이 행사 배치에서 빼기</button>
+    <button class="btn btn-line" style="width:100%;margin-top:8px;color:var(--clay);border-color:var(--clay)" onclick="rsActionUndo()">이 행사 배치를 신청 그대로 되돌리기</button>
+    <button class="btn btn-line" style="width:100%;margin-top:8px" onclick="closeRsAction()">닫기</button>
+  </div>
+</div>
+
+<div class="wizard-overlay" id="rsAddOverlay" onclick="if(event.target===this)closeRsAdd()">
+  <div class="wizard-box" style="max-width:420px">
+    <div class="wizard-head">사람 직접 추가</div>
+    <div class="tiny" style="color:var(--ink-faint);margin-bottom:14px">신청서에 없더라도, 이 자리에 직접 넣을 수 있습니다.</div>
+    <label class="tiny" style="color:var(--ink-soft)">이름</label>
+    <input type="text" id="rsAddName" placeholder="이름" style="width:100%;margin-top:5px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--sans);">
+    <label class="tiny" style="color:var(--ink-soft);display:block;margin-top:12px">어느 자리에</label>
+    <select id="rsAddSlotSelect" style="width:100%;margin-top:5px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--sans);"></select>
+    <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="rsAddConfirm()">추가하기</button>
+    <button class="btn btn-line" style="width:100%;margin-top:8px" onclick="closeRsAdd()">닫기</button>
+  </div>
+</div>
 
 <div class="wizard-overlay" id="wizardOverlay">
   <div class="wizard-box">
@@ -1162,6 +1213,7 @@ function applyLock(){
   if(typeof renderRunTimeline==="function")renderRunTimeline();
   if(typeof renderPrepTimeline==="function")renderPrepTimeline();
   if(typeof renderEvalTimeline==="function")renderEvalTimeline();
+  if(typeof renderApplications==="function"&&appLoaded)renderApplications();
 }
 function toggleLock(){editing=!editing;applyLock();showToast(editing?"편집 모드 — 수정할 수 있습니다":"잠겼습니다");}
 
@@ -1913,7 +1965,7 @@ function commsChecklistHtml(which){
   return `<div class="mini-checklist">`+list.map((item,i)=>`
     <div class="mini-check-row ${item.d?'done':''}">
       <span class="mini-check" onclick="toggleCommsItem('${which}',${i})"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-      <input type="text" class="mini-check-text-input" value="${esc(item.t)}" onchange="editCommsItem('${which}',${i},this.value)">
+      <textarea rows="1" class="mini-check-text-input" oninput="autoGrowTA(this)" onchange="editCommsItem('${which}',${i},this.value)">${esc(item.t)}</textarea>
       <button class="mini-check-del" onclick="delCommsItem('${which}',${i})">✕</button>
     </div>`).join("")+
     `<div class="mini-check-add"><input type="text" id="commsAdd-${which}" placeholder="항목 추가 (엔터)" onkeydown="if(event.key==='Enter')addCommsItem('${which}')"></div>
@@ -2142,6 +2194,7 @@ function isUpcomingApplication_(a){
   return d>=today;
 }
 
+let EVENT_SCHEDULES=[]; // main(밥은 먹었니) / applymain(8-1) / part(8-2) 일정 정의 전체
 async function loadApplications(){
   const box=$("appStateBox"),body=$("appBody");
   if(!box)return;
@@ -2149,8 +2202,15 @@ async function loadApplications(){
   box.innerHTML=`<div class="hint-banner">불러오는 중입니다…</div>`;
   try{
     const pw=getAppPw_();
-    const res=await fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"});
-    const text=await res.text();
+    const [schedRes,appRes]=await Promise.all([
+      fetch(APPSSCRIPTURL+"?t="+Date.now(),{cache:"no-store"}),
+      fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"})
+    ]);
+    try{
+      const schedJson=await schedRes.json();
+      EVENT_SCHEDULES=(schedJson.data&&schedJson.data.schedules)||[];
+    }catch(e){ EVENT_SCHEDULES=[]; }
+    const text=await appRes.text();
     if(text==="UNAUTHORIZED"){
       resetAppPw_();
       box.innerHTML=`<div class="hint-banner">비밀번호가 틀렸습니다. 다시 시도해주세요.</div><button class="btn btn-line" onclick="loadApplications()" style="margin-top:8px">다시 시도</button>`;
@@ -2179,15 +2239,342 @@ function renderAppDayFilter(base){
 }
 function setAppDayFilter(d){appDayFilter=(appDayFilter===d)?"":d;renderApplications();}
 
+// 오늘(로컬) 기준 과거 날짜인지
+// "3월모집"(구글폼, 한국어 로케일 문자열일 수 있음)과 "신청현황"(ISO 문자열) 두 형식을 모두 실제 시간값으로 변환
+function parseAnyDate_(s){
+  if(!s)return 0;
+  const d=new Date(s);
+  if(!isNaN(d.getTime()))return d.getTime();
+  const m=String(s).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})\D+(오전|오후)?\s*(\d{1,2}):(\d{2}):(\d{2})/);
+  if(m){
+    let h=parseInt(m[5],10);
+    if(m[4]==="오후"&&h<12)h+=12;
+    if(m[4]==="오전"&&h===12)h=0;
+    return new Date(+m[1],+m[2]-1,+m[3],h,+m[6],+m[7]).getTime();
+  }
+  return 0;
+}
+function isPastYMD_(month,day){
+  const d=new Date(new Date().getFullYear(),month-1,day,23,59,59);
+  const today=new Date();today.setHours(0,0,0,0);
+  return d<today;
+}
+function weekdayKo_(month,day){
+  const WD=['일','월','화','수','목','금','토'];
+  return WD[new Date(new Date().getFullYear(),month-1,day).getDay()];
+}
+function extractMainDates_(app){
+  // 신청자가 실제로 제출한 텍스트("8/19(수)~8/20(목) : 1박2일")를 그대로 읽어서
+  // 밤(duty-day)을 계산한다 — 문항이 나중에 수정돼도 이미 들어온 신청 기록은 흔들리지 않음
+  return (app.scheduleText||"").split("\n").filter(Boolean).map(line=>{
+    const m=line.match(/^(\d{1,2})\/(\d{1,2})\([^)]*\)(?:~(\d{1,2})\/(\d{1,2})\([^)]*\))?(?:\s*:\s*(.+))?/);
+    if(!m)return null;
+    const month=+m[1],day=+m[2];
+    const nightsText=(m[5]||"").trim();
+    const dutyDays=nightsText.includes("2박")?[day,day+1]:[day];
+    return {month,day,dutyDays,nightsText};
+  }).filter(Boolean);
+}
+function extractPartDates_(app){
+  return (app.partText||"").split("\n").filter(Boolean).map(line=>{
+    const m=line.match(/^(\d{1,2})\/(\d{1,2})\(([월화수목금토일])\)\s*([^,\n]*)/);
+    return m?{month:+m[1],day:+m[2],activity:(m[4]||"").trim()}:null;
+  }).filter(Boolean);
+}
+// 밥은 먹었니(main) 행사 → 그 안에 속한 8-1(applymain)/8-2(part) 정의 → 날짜별 슬롯으로 재구성
+// 신청자가 0명이어도, 정의된 문항이면 슬롯 자체는 항상 만들어서 보여준다
+//
+// [배치표 방식]
+// - 아래 신청리스트(구글시트)는 원본이고 절대 건드리지 않는다.
+// - 요약본의 각 자리(슬롯)는 처음엔 신청 내용대로 자동으로 채워진다.
+// - 사람을 옮기거나 빼거나 추가하는 순간, 그 자리의 "명단 자체"를 저장한다(roster).
+//   → 화살표를 쌓지 않으므로 몇 번을 옮겨도 한 사람은 항상 한 자리에만 존재한다.
+// - 아직 한 번도 손대지 않은 자리는 계속 신청 내용을 자동으로 따라간다.
+function ensureRoster_(e){
+  if(!e.recruitRoster)e.recruitRoster={};
+  return e.recruitRoster;
+}
+function rosterFor_(slotKey,autoNames){
+  const roster=ensureRoster_(E());
+  return Object.prototype.hasOwnProperty.call(roster,slotKey)?roster[slotKey].slice():autoNames.slice();
+}
+function setRoster_(slotKey,names){
+  const e=E();const roster=ensureRoster_(e);
+  roster[slotKey]=names.slice();
+  save();
+}
+// 어떤 사람을 이 행사 안의 모든 자리에서 제거한 뒤, 목적지 자리에만 넣는다(목적지가 없으면 제거만)
+function moveInRoster_(name,fromKey,toKey,group){
+  const allKeys=collectSlotKeys_(group);
+  allKeys.forEach(k=>{
+    const cur=currentNamesForKey_(k,group);
+    if(cur.includes(name))setRoster_(k,cur.filter(n=>n!==name));
+  });
+  if(toKey){
+    const cur=currentNamesForKey_(toKey,group);
+    if(!cur.includes(name))setRoster_(toKey,cur.concat([name]));
+  }
+}
+function collectSlotKeys_(group){
+  const keys=[];
+  group.slots.forEach(s=>{ if(s.hasPart)keys.push(s.key); if(s.바라지Key)keys.push(s.바라지Key); });
+  group.barijiFold.forEach(f=>{ if(f.key&&!keys.includes(f.key))keys.push(f.key); });
+  return keys;
+}
+function currentNamesForKey_(slotKey,group){
+  for(const s of group.slots){
+    if(s.hasPart&&s.key===slotKey)return s.파트.slice();
+    if(s.바라지Key===slotKey&&s.바라지)return s.바라지.slice();
+  }
+  for(const f of group.barijiFold){ if(f.key===slotKey)return f.names.slice(); }
+  return [];
+}
+function pushUnique_(arr,name){ if(!arr.includes(name))arr.push(name); }
+function buildRecruitSummary_(apps){
+  const mainEvents=EVENT_SCHEDULES.filter(s=>s.type==="main"&&s.status!=="cancelled");
+  const applyMains=EVENT_SCHEDULES.filter(s=>s.type==="applymain"&&s.status!=="cancelled");
+  const parts=EVENT_SCHEDULES.filter(s=>s.type==="part"&&s.status!=="cancelled");
+
+  return mainEvents.map(ev=>{
+    const evApplyMains=applyMains.filter(a=>a.month===ev.month&&a.startDay>=ev.startDay&&a.startDay<=ev.endDay);
+    const evParts=parts.filter(p=>p.month===ev.month&&p.day>=ev.startDay&&p.day<=ev.endDay);
+
+    // 파트 원본 등록자
+    const partRaw=new Map(); // "month/day/activity" -> {month,day,activity,names}
+    evParts.forEach(p=>{
+      const act=p.activity||"파트봉사";
+      const key=`${p.month}/${p.day}/${act}`;
+      if(!partRaw.has(key))partRaw.set(key,{month:p.month,day:p.day,activity:act,names:[]});
+    });
+    apps.forEach(app=>{
+      extractPartDates_(app).forEach(x=>{
+        const act=x.activity||"파트봉사";
+        const key=`${x.month}/${x.day}/${act}`;
+        if(partRaw.has(key))pushUnique_(partRaw.get(key).names,app.name||"(이름없음)");
+      });
+    });
+
+    // 바라지 원본 등록자를 밤(duty-day) 단위로 — 각 신청자 본인이 제출한 원문 기준 (문항이 나중에 수정돼도 안 흔들림)
+    const barijiRaw=new Map(); // "month/day" -> {month,day,names}
+    apps.forEach(app=>{
+      extractMainDates_(app).forEach(x=>{
+        if(x.month!==ev.month||x.day<ev.startDay||x.day>ev.endDay)return; // 이 행사 범위 밖이면 무시
+        x.dutyDays.forEach(day=>{
+          const dk=`${x.month}/${day}`;
+          if(!barijiRaw.has(dk))barijiRaw.set(dk,{month:x.month,day,names:[]});
+          pushUnique_(barijiRaw.get(dk).names,app.name||"(이름없음)");
+        });
+      });
+    });
+    // 신청자가 0명이어도, 지금 살아있는 8-1 문항이 있으면 그 duty-day는 빈 슬롯으로 표시
+    evApplyMains.forEach(a=>{
+      const dutyDays=(a.nights==="2박3일")?[a.startDay,a.startDay+1]:[a.startDay];
+      dutyDays.forEach(day=>{
+        const dk=`${a.month}/${day}`;
+        if(!barijiRaw.has(dk))barijiRaw.set(dk,{month:a.month,day,names:[]});
+      });
+    });
+
+    // 각 duty-day를 그 날의 "저녁"이 들어간 파트슬롯에 붙이거나, 없으면 단독 슬롯
+    const slotMap=new Map();
+    partRaw.forEach((v,k)=>slotMap.set(k,{month:v.month,day:v.day,activity:v.activity,key:k,hasPart:true,파트raw:v.names,바라지raw:null,바라지Key:null}));
+    barijiRaw.forEach((v,dk)=>{
+      const barijiKey=`bariji/${dk}`;
+      let targetKey=null;
+      for(const [pk,ps] of partRaw){ if(ps.month===v.month&&ps.day===v.day&&ps.activity.includes("저녁")){targetKey=pk;break;} }
+      if(targetKey){
+        const s=slotMap.get(targetKey); s.바라지raw=v.names; s.바라지Key=barijiKey;
+      }else{
+        const key=`${dk}/`;
+        if(!slotMap.has(key))slotMap.set(key,{month:v.month,day:v.day,activity:"",key,hasPart:false,파트raw:[],바라지raw:null,바라지Key:null});
+        const s=slotMap.get(key); s.바라지raw=(s.바라지raw||[]).concat(v.names); s.바라지Key=barijiKey;
+      }
+    });
+
+    const slotArr=[...slotMap.values()].filter(s=>!isPastYMD_(s.month,s.day)).map(s=>({
+      month:s.month,day:s.day,activity:s.activity,key:s.key,hasPart:s.hasPart,
+      파트:rosterFor_(s.key,s.파트raw||[]),
+      바라지:s.바라지raw!==null?rosterFor_(s.바라지Key,s.바라지raw):null,
+      바라지Key:s.바라지Key
+    })).sort((x,y)=>(x.month*100+x.day)-(y.month*100+y.day));
+
+    // 바라지 신청자만 보기 — 날짜 라벨 포함, 배치표 적용
+    const barijiFold=[...barijiRaw.entries()]
+      .filter(([dk,v])=>!isPastYMD_(v.month,v.day))
+      .sort((a,b)=>{const[am,ad]=a[0].split("/").map(Number),[bm,bd]=b[0].split("/").map(Number);return(am*100+ad)-(bm*100+bd);})
+      .map(([dk,v])=>{
+        const barijiKey=`bariji/${dk}`;
+        return {label:`${v.month}/${v.day}~${v.month}/${v.day+1} 바라지`,key:barijiKey,names:rosterFor_(barijiKey,v.names),readonly:false};
+      });
+    // 여러 밤(2박3일 등)에 걸친 신청은, 전체 숙박 범위로 묶어 보여주는 줄도 추가(읽기 전용 — 위 밤별 줄과 같은 사람을 다른 단위로 다시 보여줄 뿐)
+    // - 실제 신청자는 본인이 제출한 원문 기준으로 묶는다 / 신청자가 0명이어도 살아있는 2박3일 문항이 있으면 빈 슬롯으로 같이 보여준다
+    const multiNightNames=new Map(); // "month/day" -> Set(names)
+    apps.forEach(app=>{
+      extractMainDates_(app).forEach(x=>{
+        if(x.month!==ev.month||x.day<ev.startDay||x.day>ev.endDay)return;
+        if(x.dutyDays.length<2)return;
+        const key=`${x.month}/${x.day}`;
+        if(!multiNightNames.has(key))multiNightNames.set(key,[]);
+        pushUnique_(multiNightNames.get(key),app.name||"(이름없음)");
+      });
+    });
+    const multiNightSkeleton=new Map(); // "month/day" -> {month,startDay,endDay}
+    evApplyMains.forEach(a=>{
+      if(a.nights!=="2박3일"||isPastYMD_(a.month,a.startDay))return;
+      multiNightSkeleton.set(`${a.month}/${a.startDay}`,{month:a.month,startDay:a.startDay,endDay:a.endDay});
+    });
+    multiNightNames.forEach((names,key)=>{
+      if(!multiNightSkeleton.has(key)){
+        const[m,d]=key.split("/").map(Number);
+        multiNightSkeleton.set(key,{month:m,startDay:d,endDay:d+2});
+      }
+    });
+    [...multiNightSkeleton.entries()].sort((a,b)=>{
+      const[am,ad]=a[0].split("/").map(Number),[bm,bd]=b[0].split("/").map(Number);return(am*100+ad)-(bm*100+bd);
+    }).forEach(([key,v])=>{
+      barijiFold.push({label:`${v.month}/${v.startDay}~${v.month}/${v.endDay} 바라지`,key:null,names:multiNightNames.get(key)||[],readonly:true});
+    });
+
+    // 이 행사 안에서 "이동" 대상으로 고를 수 있는 자리 목록
+    const moveTargets=slotArr.map(s=>({key:s.key,label:`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` — ${s.activity}`:""} · 파트`}))
+      .concat(barijiFold.filter(f=>!f.readonly).map(f=>({key:f.key,label:f.label})));
+
+    // 이 행사에 신청했는데 지금 어느 자리에도 배치되지 않은 사람 = 제외된 사람
+    const placed=new Set();
+    slotArr.forEach(s=>{ (s.파트||[]).forEach(n=>placed.add(n)); (s.바라지||[]).forEach(n=>placed.add(n)); });
+    barijiFold.filter(f=>!f.readonly).forEach(f=>f.names.forEach(n=>placed.add(n)));
+    const appliedHere=new Set();
+    apps.forEach(app=>{
+      const nm=app.name||"(이름없음)";
+      extractMainDates_(app).forEach(x=>{ if(x.month===ev.month&&x.day>=ev.startDay&&x.day<=ev.endDay)appliedHere.add(nm); });
+      extractPartDates_(app).forEach(x=>{ if(x.month===ev.month&&x.day>=ev.startDay&&x.day<=ev.endDay)appliedHere.add(nm); });
+    });
+    const excludedList=[...appliedHere].filter(n=>!placed.has(n)).map(n=>({name:n}));
+
+    return {name:ev.name||"(이름 없는 행사)",slots:slotArr,barijiFold,moveTargets,excludedList};
+  }).filter(g=>g.slots.length);
+}
+function rsNameChip_(name,slotKey,slotLabel,gi){
+  if(!editing)return `<span>${esc(name)}</span>`;
+  const keyArg=slotKey?`'${esc(slotKey)}'`:"null";
+  return `<span class="rs-name" onclick="openRsAction(${keyArg},'${esc(slotLabel).replace(/'/g,"&#39;")}','${esc(name).replace(/'/g,"&#39;")}',${gi})">${esc(name)}</span>`;
+}
+function rsNamesHtml_(names,slotKey,slotLabel,gi){
+  return names.length?names.map(n=>rsNameChip_(n,slotKey,slotLabel,gi)).join(", "):'<i>아직 없음</i>';
+}
+function renderRecruitSummary_(apps){
+  const box=$("recruitSummaryBox");if(!box)return;
+  const groups=buildRecruitSummary_(apps);
+  window.__rsGroups=groups; // 액션 패널에서 이동 대상 조회용
+  if(!groups.length){box.innerHTML="";return;}
+  const roster=ensureRoster_(E());
+  const hasEdits=Object.keys(roster).length>0;
+  const resetBtn=(editing&&hasEdits)?`<button class="btn btn-line" style="width:100%;margin-bottom:10px;color:var(--clay);border-color:var(--clay)" onclick="resetRecruitRoster_()">배치 조정 전체 초기화 (신청 그대로 되돌리기)</button>`:"";
+  box.innerHTML=resetBtn+groups.map((g,gi)=>{
+    const minis=g.slots.map(s=>{
+      const dateLabel=`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` — ${esc(s.activity)}`:""}`;
+      const lines=[];
+      if(s.바라지!==null)lines.push(`<div class="rs-row"><b>바라지</b><span>${rsNamesHtml_(s.바라지,s.바라지Key,dateLabel,gi)}</span></div>`);
+      if(s.hasPart)lines.push(`<div class="rs-row"><b>파트</b><span>${rsNamesHtml_(s.파트,s.key,dateLabel,gi)}</span></div>`);
+      const total=(s.바라지?s.바라지.length:0)+s.파트.length;
+      return `<div class="rs-mini"><div class="rs-date">${dateLabel}<span class="rs-total">총 ${total}명</span></div>${lines.join("")}</div>`;
+    }).join("");
+    const foldBody=g.barijiFold.map(f=>{
+      const namesHtml=f.readonly?(f.names.length?esc(f.names.join(", ")):'아직 없음'):rsNamesHtml_(f.names,f.key,f.label,gi);
+      const rowCls=f.readonly?"rs-fold-row rs-fold-row-total":"rs-fold-row";
+      return `<div class="${rowCls}"><b>${esc(f.label)}</b><span>${namesHtml}</span></div>`;
+    }).join("");
+    const fold=g.barijiFold.length?`<div class="rs-fold">
+      <div class="rs-fold-head">바라지 신청자만 보기</div>
+      <div class="rs-fold-body">${foldBody||'<div class="rs-fold-row">아직 없음</div>'}</div>
+    </div>`:"";
+    const excludedBox=(editing&&g.excludedList.length)?`<div class="rs-excluded">
+      <div class="rs-excluded-h">배치되지 않은 사람</div>
+      ${g.excludedList.map(x=>`<div class="rs-excluded-row">${rsNameChip_(x.name,null,"배치 안 됨",gi)}<span class="rs-excluded-from">눌러서 자리 지정</span></div>`).join("")}
+    </div>`:"";
+    const addBtn=editing?`<button class="btn btn-line" style="width:100%;margin-top:8px" onclick="openRsAddPerson(${gi})">＋ 이 행사에 사람 직접 추가</button>`:"";
+    return `<div class="recruit-summary-group" data-gi="${gi}"><div class="rs-event">${esc(g.name)}</div>${minis}${fold}${excludedBox}${addBtn}</div>`;
+  }).join("");
+}
+/* ===== 이름 클릭 → 배치 조정 패널 (배치표 방식) ===== */
+let rsAction={slotKey:null,name:null,gi:null};
+function openRsAction(slotKey,slotLabel,name,gi){
+  if(!editing)return;
+  rsAction={slotKey,name,gi};
+  $("rsActionName").textContent=name;
+  $("rsActionFrom").textContent=`현재: ${slotLabel}`;
+  const groups=window.__rsGroups||[];
+  const g=groups[gi];
+  const sel=$("rsActionMoveSelect");
+  const targets=g?g.moveTargets.filter(t=>t.key!==slotKey):[];
+  sel.innerHTML=targets.length?targets.map(t=>`<option value="${esc(t.key)}">${esc(t.label)}</option>`).join(""):`<option value="">옮길 다른 자리가 없습니다</option>`;
+  $("rsActionOverlay").classList.add("show");
+}
+function closeRsAction(){ $("rsActionOverlay").classList.remove("show"); }
+function rsActionExclude(){
+  const g=(window.__rsGroups||[])[rsAction.gi];
+  if(!g){showToast("대상을 찾지 못했습니다");return;}
+  moveInRoster_(rsAction.name,rsAction.slotKey,null,g); // 목적지 없이 = 모든 자리에서 빼기
+  renderApplications();closeRsAction();showToast("이 행사 배치에서 뺐습니다");
+}
+function rsActionMove(){
+  const to=$("rsActionMoveSelect").value;
+  if(!to){showToast("옮길 자리가 없습니다");return;}
+  const g=(window.__rsGroups||[])[rsAction.gi];
+  if(!g){showToast("대상을 찾지 못했습니다");return;}
+  moveInRoster_(rsAction.name,rsAction.slotKey,to,g);
+  renderApplications();closeRsAction();showToast("옮겼습니다");
+}
+function rsActionUndo(){
+  // 이 사람이 속한 행사의 모든 자리를 자동(신청 그대로) 상태로 되돌린다
+  const g=(window.__rsGroups||[])[rsAction.gi];
+  if(!g){showToast("대상을 찾지 못했습니다");return;}
+  if(!confirm("이 행사의 배치 조정을 모두 지우고 신청 그대로 되돌릴까요?"))return;
+  const e=E();const roster=ensureRoster_(e);
+  collectSlotKeys_(g).forEach(k=>{ delete roster[k]; });
+  save();renderApplications();closeRsAction();showToast("신청 그대로 되돌렸습니다");
+}
+function resetRecruitRoster_(){
+  if(!confirm("지금까지 조정한 배치를 전부 지우고 신청 내용 그대로 되돌릴까요?"))return;
+  const e=E();
+  e.recruitRoster={};
+  save();renderApplications();showToast("전체 초기화했습니다");
+}
+/* ===== 사람 직접 추가 ===== */
+let rsAddGi=null;
+function openRsAddPerson(gi){
+  if(!editing)return;
+  rsAddGi=gi;
+  const g=(window.__rsGroups||[])[gi];
+  if(!g)return;
+  $("rsAddName").value="";
+  const sel=$("rsAddSlotSelect");
+  sel.innerHTML=g.moveTargets.map(t=>`<option value="${esc(t.key)}">${esc(t.label)}</option>`).join("")||`<option value="">추가할 자리가 없습니다</option>`;
+  $("rsAddOverlay").classList.add("show");
+}
+function closeRsAdd(){ $("rsAddOverlay").classList.remove("show"); }
+function rsAddConfirm(){
+  const name=$("rsAddName").value.trim();
+  const to=$("rsAddSlotSelect").value;
+  if(!name){showToast("이름을 입력해주세요");return;}
+  if(!to){showToast("추가할 자리가 없습니다");return;}
+  const g=(window.__rsGroups||[])[rsAddGi];
+  if(!g){showToast("대상을 찾지 못했습니다");return;}
+  const cur=currentNamesForKey_(to,g);
+  if(cur.includes(name)){showToast("이미 그 자리에 있습니다");return;}
+  setRoster_(to,cur.concat([name]));
+  renderApplications();closeRsAdd();showToast("추가했습니다");
+}
 function renderApplications(){
   if(!appLoaded)return;
   const upcoming=APPLICATIONS.filter(isUpcomingApplication_);
   const pastCnt=APPLICATIONS.length-upcoming.length;
+  renderRecruitSummary_(upcoming);
   const q=($("appSearch")?$("appSearch").value:"").trim().toLowerCase();
   let filtered=upcoming.filter(a=>!q||[a.name,a.phone,a.bu,a.ji].some(v=>(v||"").toLowerCase().includes(q)));
   renderAppDayFilter(filtered);
   if(appDayFilter)filtered=filtered.filter(a=>applicationDays_(a).includes(appDayFilter));
-  filtered=filtered.slice().sort((a,b)=>(b.submittedAt||"").localeCompare(a.submittedAt||""));
+  filtered=filtered.slice().sort((a,b)=>parseAnyDate_(b.submittedAt)-parseAnyDate_(a.submittedAt));
   $("appSummary").innerHTML=`총 <b>${upcoming.length}</b>명 신청 · 지금 <b>${filtered.length}</b>명 표시 중${pastCnt?` · 지난 일정 ${pastCnt}명은 숨김`:""}`;
   $("appList").innerHTML=filtered.map(a=>{
     const when=a.submittedAt?new Date(a.submittedAt).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
@@ -2524,10 +2911,18 @@ function timelineHtml(stage,steps){
     </div>`;
   }).join("")+`</div>`;
 }
+function autoGrowTA(el){
+  if(!el)return;
+  el.style.height="auto";
+  el.style.height=(el.scrollHeight+2)+"px";
+}
 function toggleFlowExtra(id){
   const el=$(id);if(!el)return;
   el.classList.toggle("hidden");
   if(openExtras.has(id))openExtras.delete(id);else openExtras.add(id);
+  if(!el.classList.contains("hidden")){
+    el.querySelectorAll("textarea").forEach(autoGrowTA);
+  }
 }
 function toggleStepDone(stage,id,evt){
   if(evt)evt.stopPropagation();
@@ -2579,6 +2974,7 @@ function renderPrepTimeline(){
   }).join("")+`</div>`;
   const active=groups.find(g=>g.key===prepSegment)||groups[0];
   el.innerHTML=timelineHtml("prep",infoStep)+segHtml+timelineHtml("prep",active.steps);
+  el.querySelectorAll(".flow-step-extra:not(.hidden) textarea").forEach(autoGrowTA);
 }
 function renderRunTimeline(){
   const el=$("runTimeline");if(!el)return;
@@ -2596,6 +2992,7 @@ function renderRunTimeline(){
     {id:"note",title:"그날 느낀 점 기록",desc:"떠오른 것을 바로 적어두세요.",tab:"memo"},
   ];
   el.innerHTML=timelineHtml("run",steps);
+  el.querySelectorAll(".flow-step-extra:not(.hidden) textarea").forEach(autoGrowTA);
 }
 function renderEvalTimeline(){
   const el=$("evalTimeline");if(!el)return;
@@ -2606,7 +3003,7 @@ function renderEvalTimeline(){
     {id:"refl",title:"바라지 소감 텔레그램 공유",desc:"이번 소감을 적고 복사해서 소통방에 올리세요.",extraId:"ex-refl",extra:`
       <div class="tiny" style="margin-bottom:8px;color:var(--ink-faint);">예시 (지난 소감)</div>
       <div style="white-space:pre-wrap;font-size:12.5px;color:var(--ink-faint);border-left:2px solid var(--line);padding-left:10px;margin-bottom:12px;max-height:120px;overflow-y:auto;">${esc(SAMPLE_REFLECTION)}</div>
-      <textarea id="evalReflectionInput" class="inline-textarea" placeholder="이번 소감을 적어보세요…" oninput="E().evalReflection=this.value;save();">${esc(e.evalReflection||"")}</textarea>
+      <textarea id="evalReflectionInput" class="inline-textarea" placeholder="이번 소감을 적어보세요…" oninput="autoGrowTA(this);E().evalReflection=this.value;save();">${esc(e.evalReflection||"")}</textarea>
       <button class="btn btn-gold btn-sm" style="margin-top:8px" onclick="copyEvalReflection()">복사하기</button>`},
     {id:"photo",title:"활동 사진 공유",desc:"바라지 활동 중 찍은 사진을 소통방에 올려주세요. (이 앱에는 사진을 올리지 않습니다)"},
     {id:"survey",title:"평가 설문 공유",desc:"구글폼 설문 링크를 저장해두고 복사해 쓰세요.",extraId:"ex-survey",
@@ -2621,13 +3018,14 @@ function renderEvalTimeline(){
     {substage:"공동작업"},
     {id:"feedback",title:"꼭지 평가회의 피드백",desc:"눌러서 안건·메모·피드백을 나눠 적어보세요.",extraId:"ex-feedback",extra:`
       <div class="oc-sub-label">내가 공유할 안건</div>
-      <textarea class="inline-textarea" style="min-height:64px" oninput="E().meetingEval.agenda=this.value;save();">${esc(e.meetingEval.agenda||"")}</textarea>
+      <textarea class="inline-textarea" style="min-height:60px" oninput="autoGrowTA(this);E().meetingEval.agenda=this.value;save();">${esc(e.meetingEval.agenda||"")}</textarea>
       <div class="oc-sub-label">회의 중 끄적끄적</div>
-      <textarea class="inline-textarea" style="min-height:64px" oninput="E().meetingEval.notes=this.value;save();">${esc(e.meetingEval.notes||"")}</textarea>
+      <textarea class="inline-textarea" style="min-height:60px" oninput="autoGrowTA(this);E().meetingEval.notes=this.value;save();">${esc(e.meetingEval.notes||"")}</textarea>
       <div class="oc-sub-label">피드백과 개선 아이디어</div>
-      <textarea class="inline-textarea" style="min-height:64px" oninput="E().meetingEval.feedback=this.value;save();">${esc(e.meetingEval.feedback||"")}</textarea>`},
+      <textarea class="inline-textarea" style="min-height:60px" oninput="autoGrowTA(this);E().meetingEval.feedback=this.value;save();">${esc(e.meetingEval.feedback||"")}</textarea>`},
   ];
   el.innerHTML=timelineHtml("eval",steps);
+  el.querySelectorAll(".flow-step-extra:not(.hidden) textarea").forEach(autoGrowTA);
 }
 function copyEvalReflection(){
   const ta=$("evalReflectionInput");if(!ta)return;
