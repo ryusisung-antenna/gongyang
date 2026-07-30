@@ -161,9 +161,9 @@
   .rs-mini{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow);}
   .rs-date{font-family:var(--serif);font-weight:700;font-size:12.5px;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
   .rs-total{font-family:var(--sans);font-weight:600;font-size:11px;color:var(--green-deep);display:inline-flex;align-items:center;gap:6px;}
-  .rs-closed-tag{font-size:10px;font-weight:700;color:#fff;background:var(--clay);border-radius:20px;padding:1px 7px;}
-  .rs-close-btn{font-size:10.5px;font-weight:600;border:1px solid var(--clay);color:var(--clay);background:var(--card);border-radius:20px;padding:2px 9px;cursor:pointer;}
-  .rs-close-btn.is-closed{background:var(--clay);color:#fff;}
+  .rs-date-right{display:flex;align-items:center;gap:7px;flex:none;}
+  .rs-pill{font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 10px;cursor:pointer;border:1px solid var(--line);color:var(--ink-soft);background:var(--card);}
+  .rs-pill.is-closed{background:var(--clay);color:#fff;border-color:var(--clay);}
   .rs-row{font-size:12px;line-height:1.6;display:flex;gap:6px;}
   .rs-fold{border:1px dashed var(--green);border-radius:10px;padding:10px 12px;margin-top:10px;}
   .rs-fold-head{font-size:12px;font-weight:700;color:var(--green-deep);display:flex;justify-content:space-between;align-items:baseline;}
@@ -2632,8 +2632,8 @@ function renderRecruitSummary_(apps){
       if(s.hasPart)lines.push(`<div class="rs-row"><b>파트</b><span>${rsNamesHtml_(s.파트,s.key,dateLabel,gi)}</span></div>`);
       const total=(s.바라지?s.바라지.length:0)+s.파트.length;
       const allClosed=s.scheduleIds.length>0&&s.scheduleIds.every(id=>{const sc=EVENT_SCHEDULES.find(x=>x.id===id);return sc&&sc.closed===true;});
-      const closeBtn=(editing&&s.scheduleIds.length)?`<button class="rs-close-btn ${allClosed?'is-closed':''}" onclick='toggleSlotClosed_(${JSON.stringify(s.scheduleIds)},${!allClosed})'>${allClosed?"열기":"마감"}</button>`:"";
-      return `<div class="rs-mini"><div class="rs-date">${dateLabel}<span class="rs-total">${allClosed?'<span class="rs-closed-tag">마감</span> ':''}총 ${total}명${closeBtn}</span></div>${lines.join("")}</div>`;
+      const closePill=(editing&&s.scheduleIds.length)?`<span class="rs-pill ${allClosed?'is-closed':''}" onclick='toggleSlotClosed_(${JSON.stringify(s.scheduleIds)},${!allClosed})'>${allClosed?"마감":"마감하기"}</span>`:(allClosed?`<span class="rs-pill is-closed">마감</span>`:"");
+      return `<div class="rs-mini"><div class="rs-date"><span>${dateLabel}</span><span class="rs-date-right"><span class="rs-total">총 ${total}명</span>${closePill}</span></div>${lines.join("")}</div>`;
     }).join("");
     const foldBody=g.barijiFold.map(f=>{
       const namesHtml=f.readonly?(f.names.length?esc(f.names.join(", ")):'아직 없음'):rsNamesHtml_(f.names,f.key,f.label,gi,n=>g.nameCompositeKey[n]);
