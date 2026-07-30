@@ -147,7 +147,7 @@
   .pool-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
   .pool-phone{font-size:12px;color:var(--ink-faint);flex:none;}
   /* 웹자보 */
-  .promo-preview{border:1px solid var(--line);border-radius:6px;overflow:hidden;height:480px;background:#fff;}
+  .promo-url-box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink);word-break:break-all;line-height:1.5;}
   /* 신청현황 */
   .app-card{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:8px;background:var(--card);box-shadow:var(--shadow);}
   .app-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
@@ -163,7 +163,7 @@
   .rs-total{font-family:var(--sans);font-weight:600;font-size:11px;color:var(--green-deep);}
   .rs-row{font-size:12px;line-height:1.6;display:flex;gap:6px;}
   .rs-fold{border:1px dashed var(--green);border-radius:10px;padding:10px 12px;margin-top:10px;}
-  .rs-fold-head{font-size:12px;font-weight:700;color:var(--green-deep);}
+  .rs-fold-head{font-size:12px;font-weight:700;color:var(--green-deep);display:flex;justify-content:space-between;align-items:baseline;}
   .rs-fold-body{margin-top:7px;font-size:12px;color:var(--ink-soft);line-height:1.8;}
   .rs-fold-body.hidden{display:none;}
   .rs-fold-row b{color:var(--ink);font-weight:600;margin-right:5px;}
@@ -182,8 +182,6 @@
   .app-tag.pending{color:var(--clay);border-color:var(--clay);}
   .app-motive{margin-top:7px;font-size:12px;color:var(--ink-soft);line-height:1.5;}
   .app-time{margin-top:6px;font-size:10.5px;color:var(--ink-faint);}
-  .promo-preview iframe{width:100%;height:100%;border:none;}
-  .promo-source{width:100%;min-height:220px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:12px;font-family:monospace;font-size:11.5px;line-height:1.6;}
   /* 소통관련 미니 체크리스트 */
   .mini-checklist{display:flex;flex-direction:column;}
   .mini-check-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line-soft);}
@@ -231,6 +229,10 @@
   .panel.active{display:block;}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
   .section-head{font-family:var(--serif);font-weight:600;font-size:18px;margin:2px 0 4px;display:flex;align-items:center;gap:9px;color:var(--ink);}
+  .section-head-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+  .sheet-link-btn{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);cursor:pointer;}
+  .sheet-link-btn i{font-size:14px;}
+  .sheet-link-btn:active{background:var(--panel-2);}
   .section-head .sec-blob{flex:none;width:30px;height:30px;border-radius:44% 56% 52% 48% / 56% 42% 58% 44%;display:flex;align-items:center;justify-content:center;font-size:15px;}
   .sec-blob.bl-lilac{background:#E8E0F0;color:#7A5FA6;}
   .sec-blob.bl-moss{background:#EAF0DD;color:#6E8C3A;}
@@ -661,18 +663,12 @@
     </div>
   </section>
 
-  <section class="panel" id="panel-promo">
-    <div class="section-back"><button class="back-btn" onclick="goBack()">‹ 뒤로</button></div>
-    <div class="section-head"><span class="sec-blob bl-sky"><i class="ti ti-photo"></i></span>바라지 홍보 웹자보</div>
-    <div class="section-desc">만들고 계신 홍보 웹자보를 여기서 미리 보고 다듬으세요. 코드를 고치고 "미리보기 갱신"을 누르면 아래 화면에 바로 반영됩니다.</div>
-    <div class="promo-preview"><iframe id="promoFrame" title="웹자보 미리보기"></iframe></div>
-    <button class="btn btn-gold btn-sm" onclick="refreshPromoPreview()" style="width:100%;margin:10px 0">미리보기 갱신</button>
-    <textarea id="promoSource" class="promo-source" spellcheck="false" onchange="savePromoSource()"></textarea>
-  </section>
-
   <section class="panel" id="panel-applications">
     <div class="section-back"><button class="back-btn" onclick="goBack()">‹ 뒤로</button></div>
-    <div class="section-head"><span class="sec-blob bl-moss"><i class="ti ti-clipboard-check"></i></span>모집 현황 파악</div>
+    <div class="section-head-row">
+      <div class="section-head" style="margin-bottom:0"><span class="sec-blob bl-moss"><i class="ti ti-clipboard-check"></i></span>모집 현황 파악</div>
+      <button class="sheet-link-btn" title="원본 시트에서 보기" onclick="window.open('https://docs.google.com/spreadsheets/d/1Y-tSXNP2Afu509XrQPPtWJHF4esTr7b8KWNU1UhCMfA/edit','_blank')"><i class="ti ti-external-link"></i></button>
+    </div>
     <div class="section-desc">웹자보로 들어온 신청을 모아서 보여줍니다.</div>
     <div id="appStateBox"></div>
     <div id="appBody" style="display:none">
@@ -2152,6 +2148,7 @@ function addPoolPerson(){
 /* ===== 바라지 홍보 웹자보 (전체 행사 공용) ===== */
 /* ===== 신청현황 (backend A 연결) ===== */
 const APPSSCRIPTURL = "https://script.google.com/macros/s/AKfycbypbINZxPPOTBCSPZL39LOWgZnqcRaxo0akj9fDN4Rsv6kZ3-dkUfhJ0ctV9CBF87Rs/exec";
+const PROMO_APP_URL = "https://ryusisung-antenna.github.io/baraji/baraji-apply.html";
 const APP_PW_KEY = "app_status_pw";
 const APP_DAY_BUTTONS = ["수","목","금"];
 let APPLICATIONS = [];
@@ -2220,6 +2217,7 @@ async function loadApplications(){
     try{json=JSON.parse(text);}catch(e){throw new Error("PARSE");}
     if(!json.ok)throw new Error(json.error||"NOTREADY");
     APPLICATIONS=json.data||[];
+    await loadRecruitOverrides_(); // 배치 조정도 공용 저장소에서 함께 불러온다
     appLoaded=true;
     box.innerHTML="";
     body.style.display="block";
@@ -2263,74 +2261,120 @@ function weekdayKo_(month,day){
   const WD=['일','월','화','수','목','금','토'];
   return WD[new Date(new Date().getFullYear(),month-1,day).getDay()];
 }
+// 신청 텍스트를 개별 항목으로 쪼갠다.
+// "신청현황"(새 앱)은 줄바꿈으로, "3월모집"(옛 구글폼)은 콤마로 여러 건을 이어붙이므로 둘 다 처리한다.
+function splitEntries_(text){
+  if(!text)return [];
+  return String(text).split(/[\n,]/).map(s=>s.trim())
+    .filter(s=>s&&/\d{1,2}\s*\/\s*\d{1,2}\s*\(/.test(s)); // 날짜가 들어있는 조각만
+}
 function extractMainDates_(app){
-  // 신청자가 실제로 제출한 텍스트("8/19(수)~8/20(목) : 1박2일")를 그대로 읽어서
-  // 밤(duty-day)을 계산한다 — 문항이 나중에 수정돼도 이미 들어온 신청 기록은 흔들리지 않음
-  return (app.scheduleText||"").split("\n").filter(Boolean).map(line=>{
-    const m=line.match(/^(\d{1,2})\/(\d{1,2})\([^)]*\)(?:~(\d{1,2})\/(\d{1,2})\([^)]*\))?(?:\s*:\s*(.+))?/);
+  // 형식이 서로 다른 두 시트를 모두 읽는다
+  //  - 새 앱  : "8/19(수)~8/20(목) : 1박2일"
+  //  - 옛 폼  : "바라지 8/20(목) 13:30 ~ 8/21(금) 14:30 (1박2일)"
+  // 줄 어디에 있든 첫 날짜를 시작일로 보고, "N박"을 찾아 며칠치인지 계산한다
+  return splitEntries_(app.scheduleText).map(seg=>{
+    const m=seg.match(/(\d{1,2})\s*\/\s*(\d{1,2})\s*\(/);
     if(!m)return null;
     const month=+m[1],day=+m[2];
-    const nightsText=(m[5]||"").trim();
-    const dutyDays=nightsText.includes("2박")?[day,day+1]:[day];
-    return {month,day,dutyDays,nightsText};
+    const nm=seg.match(/(\d+)\s*박/);
+    const nights=nm?parseInt(nm[1],10):1;
+    const dutyDays=[];for(let i=0;i<Math.max(nights,1);i++)dutyDays.push(day+i);
+    return {month,day,dutyDays,nightsText:nm?nm[0]:""};
   }).filter(Boolean);
 }
 function extractPartDates_(app){
-  return (app.partText||"").split("\n").filter(Boolean).map(line=>{
-    const m=line.match(/^(\d{1,2})\/(\d{1,2})\(([월화수목금토일])\)\s*([^,\n]*)/);
-    return m?{month:+m[1],day:+m[2],activity:(m[4]||"").trim()}:null;
+  // 형식이 서로 다른 두 시트를 모두 읽는다
+  //  - 새 앱  : "8/20(목) 점심공양지원"
+  //  - 옛 폼  : "파트봉사 8/14(금) 09:00 ~ 14:00 : 점심공양지원"
+  const knownActs=[...new Set(EVENT_SCHEDULES.filter(s=>s.type==="part").map(s=>s.activity).filter(Boolean))];
+  return splitEntries_(app.partText).map(seg=>{
+    const m=seg.match(/(\d{1,2})\s*\/\s*(\d{1,2})\s*\(/);
+    if(!m)return null;
+    const month=+m[1],day=+m[2];
+    let activity="";
+    for(const a of knownActs){ if(seg.includes(a)){activity=a;break;} }
+    if(!activity){
+      const c=seg.lastIndexOf(":");
+      const tail=(c>=0?seg.slice(c+1):seg.slice(seg.indexOf(")")+1)).trim();
+      if(tail&&!/^\d+$/.test(tail))activity=tail; // "19:30"의 뒷자리 같은 숫자 조각은 활동명으로 보지 않음
+    }
+    return {month,day,activity};
   }).filter(Boolean);
 }
 // 밥은 먹었니(main) 행사 → 그 안에 속한 8-1(applymain)/8-2(part) 정의 → 날짜별 슬롯으로 재구성
 // 신청자가 0명이어도, 정의된 문항이면 슬롯 자체는 항상 만들어서 보여준다
 //
-// [배치표 방식]
+// [조정 오버레이 방식]
 // - 아래 신청리스트(구글시트)는 원본이고 절대 건드리지 않는다.
-// - 요약본의 각 자리(슬롯)는 처음엔 신청 내용대로 자동으로 채워진다.
-// - 사람을 옮기거나 빼거나 추가하는 순간, 그 자리의 "명단 자체"를 저장한다(roster).
-//   → 화살표를 쌓지 않으므로 몇 번을 옮겨도 한 사람은 항상 한 자리에만 존재한다.
-// - 아직 한 번도 손대지 않은 자리는 계속 신청 내용을 자동으로 따라간다.
-function ensureRoster_(e){
-  if(!e.recruitRoster)e.recruitRoster={};
-  return e.recruitRoster;
-}
-function rosterFor_(slotKey,autoNames){
-  const roster=ensureRoster_(E());
-  return Object.prototype.hasOwnProperty.call(roster,slotKey)?roster[slotKey].slice():autoNames.slice();
-}
-function setRoster_(slotKey,names){
-  const e=E();const roster=ensureRoster_(e);
-  roster[slotKey]=names.slice();
-  save();
-}
-// 어떤 사람을 이 행사 안의 모든 자리에서 제거한 뒤, 목적지 자리에만 넣는다(목적지가 없으면 제거만)
-function moveInRoster_(name,fromKey,toKey,group){
-  const allKeys=collectSlotKeys_(group);
-  allKeys.forEach(k=>{
-    const cur=currentNamesForKey_(k,group);
-    if(cur.includes(name))setRoster_(k,cur.filter(n=>n!==name));
-  });
-  if(toKey){
-    const cur=currentNamesForKey_(toKey,group);
-    if(!cur.includes(name))setRoster_(toKey,cur.concat([name]));
+// - 각 자리는 항상 "지금 신청 데이터"로 먼저 자동 계산한다 → 새 신청이 들어오면 손댄 적 없는 사람은 바로바로 반영된다.
+// - "이 사람만" 특정 자리에서 뺐다/넣었다는 걸 사람 단위로 따로 저장한다(화살표를 쌓지 않고, 뺌/넣음 두 가지 표시만 사용).
+// - 옮기기 = 원래 자리에 "뺌" 표시 + 목적지에 "넣음" 표시. 다시 원래 자리로 옮기면 그 표시들을 서로 지워서, 신청 데이터가 바뀌어도 항상 정확하다.
+// 모집현황 배치 조정 — 공양꼭지·신청앱이 같은 데이터를 공유하도록 backend A에 저장한다
+let RECRUIT_OVERRIDES={removed:{},added:{}};
+function ensureOverrides_(){
+  if(!RECRUIT_OVERRIDES||typeof RECRUIT_OVERRIDES.removed!=="object"||typeof RECRUIT_OVERRIDES.added!=="object"){
+    RECRUIT_OVERRIDES={removed:{},added:{}};
   }
+  return RECRUIT_OVERRIDES;
+}
+async function loadRecruitOverrides_(){
+  try{
+    const pw=getAppPw_();
+    const res=await fetch(APPSSCRIPTURL+"?action=getRecruitOverrides&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"});
+    const text=await res.text();
+    if(text==="UNAUTHORIZED"){RECRUIT_OVERRIDES={removed:{},added:{}};return;}
+    const json=JSON.parse(text);
+    RECRUIT_OVERRIDES=(json.ok&&json.data)?json.data:{removed:{},added:{}};
+    ensureOverrides_();
+  }catch(e){ RECRUIT_OVERRIDES={removed:{},added:{}}; }
+}
+async function saveRecruitOverrides_(){
+  try{
+    const pw=getAppPw_();
+    const res=await fetch(APPSSCRIPTURL,{method:"POST",body:JSON.stringify({action:"saveRecruitOverrides",pw:pw,value:RECRUIT_OVERRIDES})});
+    const json=await res.json();
+    if(!json.ok)showToast("조정 저장 실패 — 비밀번호를 확인해주세요");
+  }catch(e){ showToast("조정 저장 실패 — 네트워크 오류"); }
+}
+function ovKey_(name,slotKey){return `${name}@${slotKey}`;}
+function applyOverrides_(autoNames,slotKey,ov){
+  let result=autoNames.filter(n=>!ov.removed[ovKey_(n,slotKey)]);
+  Object.keys(ov.added).forEach(k=>{
+    if(!ov.added[k])return;
+    const idx=k.lastIndexOf("@");
+    const name=k.slice(0,idx),sk=k.slice(idx+1);
+    if(sk===slotKey&&!ov.removed[k]&&!result.includes(name))result.push(name);
+  });
+  return result;
+}
+function expandTargetKey_(key){
+  if(key&&key.indexOf("multi:")===0)return key.slice(6).split("|");
+  return key?[key]:[];
+}
+// 어떤 사람을 특정 자리에서 빼고(선택), 목적지 자리에 넣는다(선택) — 화살표 없이, 두 가지 표시만으로
+function setPlacement_(name,fromKey,toKey){
+  const ov=ensureOverrides_();
+  expandTargetKey_(fromKey).forEach(k=>{
+    ov.removed[ovKey_(name,k)]=true;
+    delete ov.added[ovKey_(name,k)];
+  });
+  expandTargetKey_(toKey).forEach(k=>{
+    ov.added[ovKey_(name,k)]=true;
+    delete ov.removed[ovKey_(name,k)];
+  });
+  saveRecruitOverrides_();
 }
 function collectSlotKeys_(group){
   const keys=[];
   group.slots.forEach(s=>{ if(s.hasPart)keys.push(s.key); if(s.바라지Key)keys.push(s.바라지Key); });
-  group.barijiFold.forEach(f=>{ if(f.key&&!keys.includes(f.key))keys.push(f.key); });
+  group.barijiFold.forEach(f=>{ if(f.key&&!f.readonly&&!keys.includes(f.key))keys.push(f.key); });
   return keys;
 }
-function currentNamesForKey_(slotKey,group){
-  for(const s of group.slots){
-    if(s.hasPart&&s.key===slotKey)return s.파트.slice();
-    if(s.바라지Key===slotKey&&s.바라지)return s.바라지.slice();
-  }
-  for(const f of group.barijiFold){ if(f.key===slotKey)return f.names.slice(); }
-  return [];
-}
 function pushUnique_(arr,name){ if(!arr.includes(name))arr.push(name); }
+function cleanName_(name){ return String(name||"").trim()||"(이름없음)"; }
 function buildRecruitSummary_(apps){
+  const ov=ensureOverrides_();
   const mainEvents=EVENT_SCHEDULES.filter(s=>s.type==="main"&&s.status!=="cancelled");
   const applyMains=EVENT_SCHEDULES.filter(s=>s.type==="applymain"&&s.status!=="cancelled");
   const parts=EVENT_SCHEDULES.filter(s=>s.type==="part"&&s.status!=="cancelled");
@@ -2350,19 +2394,23 @@ function buildRecruitSummary_(apps){
       extractPartDates_(app).forEach(x=>{
         const act=x.activity||"파트봉사";
         const key=`${x.month}/${x.day}/${act}`;
-        if(partRaw.has(key))pushUnique_(partRaw.get(key).names,app.name||"(이름없음)");
+        if(partRaw.has(key))pushUnique_(partRaw.get(key).names,cleanName_(app.name));
       });
     });
 
     // 바라지 원본 등록자를 밤(duty-day) 단위로 — 각 신청자 본인이 제출한 원문 기준 (문항이 나중에 수정돼도 안 흔들림)
     const barijiRaw=new Map(); // "month/day" -> {month,day,names}
+    const nameCompositeKey={}; // 이름 -> 그 사람의 바라지 등록건이 걸친 밤 전체를 가리키는 키(2박3일이면 multi:날짜1|날짜2)
     apps.forEach(app=>{
       extractMainDates_(app).forEach(x=>{
         if(x.month!==ev.month||x.day<ev.startDay||x.day>ev.endDay)return; // 이 행사 범위 밖이면 무시
+        const nm=cleanName_(app.name);
+        const fullKeys=x.dutyDays.map(d=>`bariji/${x.month}/${d}`);
+        nameCompositeKey[nm]=fullKeys.length>1?`multi:${fullKeys.join("|")}`:fullKeys[0];
         x.dutyDays.forEach(day=>{
           const dk=`${x.month}/${day}`;
           if(!barijiRaw.has(dk))barijiRaw.set(dk,{month:x.month,day,names:[]});
-          pushUnique_(barijiRaw.get(dk).names,app.name||"(이름없음)");
+          pushUnique_(barijiRaw.get(dk).names,nm);
         });
       });
     });
@@ -2393,51 +2441,50 @@ function buildRecruitSummary_(apps){
 
     const slotArr=[...slotMap.values()].filter(s=>!isPastYMD_(s.month,s.day)).map(s=>({
       month:s.month,day:s.day,activity:s.activity,key:s.key,hasPart:s.hasPart,
-      파트:rosterFor_(s.key,s.파트raw||[]),
-      바라지:s.바라지raw!==null?rosterFor_(s.바라지Key,s.바라지raw):null,
+      파트:applyOverrides_(s.파트raw||[],s.key,ov),
+      바라지:s.바라지raw!==null?applyOverrides_(s.바라지raw,s.바라지Key,ov):null,
       바라지Key:s.바라지Key
     })).sort((x,y)=>(x.month*100+x.day)-(y.month*100+y.day));
 
-    // 바라지 신청자만 보기 — 날짜 라벨 포함, 배치표 적용
+    // 바라지 신청자만 보기 — 날짜 라벨 포함, 조정 반영
     const barijiFold=[...barijiRaw.entries()]
       .filter(([dk,v])=>!isPastYMD_(v.month,v.day))
       .sort((a,b)=>{const[am,ad]=a[0].split("/").map(Number),[bm,bd]=b[0].split("/").map(Number);return(am*100+ad)-(bm*100+bd);})
       .map(([dk,v])=>{
         const barijiKey=`bariji/${dk}`;
-        return {label:`${v.month}/${v.day}~${v.month}/${v.day+1} 바라지`,key:barijiKey,names:rosterFor_(barijiKey,v.names),readonly:false};
+        return {label:`${v.month}/${v.day}~${v.month}/${v.day+1} 바라지`,key:barijiKey,names:applyOverrides_(v.names,barijiKey,ov),readonly:false};
       });
-    // 여러 밤(2박3일 등)에 걸친 신청은, 전체 숙박 범위로 묶어 보여주는 줄도 추가(읽기 전용 — 위 밤별 줄과 같은 사람을 다른 단위로 다시 보여줄 뿐)
-    // - 실제 신청자는 본인이 제출한 원문 기준으로 묶는다 / 신청자가 0명이어도 살아있는 2박3일 문항이 있으면 빈 슬롯으로 같이 보여준다
-    const multiNightNames=new Map(); // "month/day" -> Set(names)
-    apps.forEach(app=>{
-      extractMainDates_(app).forEach(x=>{
-        if(x.month!==ev.month||x.day<ev.startDay||x.day>ev.endDay)return;
-        if(x.dutyDays.length<2)return;
-        const key=`${x.month}/${x.day}`;
-        if(!multiNightNames.has(key))multiNightNames.set(key,[]);
-        pushUnique_(multiNightNames.get(key),app.name||"(이름없음)");
-      });
-    });
+    // 여러 밤(2박3일 등)에 걸친 신청은, 전체 숙박 범위로 묶어 보여주는 줄도 추가
+    // - 이름은 "위 밤별 줄들의 교집합"으로 계산한다 → 배치표(사람 추가·이동)를 그대로 반영하고, 일정이 나중에 바뀌어도 항상 지금 상태와 일치한다
+    // - 신청자가 0명이어도 살아있는 2박3일 문항이 있으면 빈 슬롯으로 같이 보여준다
+    const nightEntryByKey={}; barijiFold.forEach(f=>{ nightEntryByKey[f.key]=f; });
     const multiNightSkeleton=new Map(); // "month/day" -> {month,startDay,endDay}
     evApplyMains.forEach(a=>{
       if(a.nights!=="2박3일"||isPastYMD_(a.month,a.startDay))return;
       multiNightSkeleton.set(`${a.month}/${a.startDay}`,{month:a.month,startDay:a.startDay,endDay:a.endDay});
     });
-    multiNightNames.forEach((names,key)=>{
-      if(!multiNightSkeleton.has(key)){
-        const[m,d]=key.split("/").map(Number);
-        multiNightSkeleton.set(key,{month:m,startDay:d,endDay:d+2});
-      }
+    // 실제로 2박 이상 신청한 사람이 있는데 살아있는 문항엔 없는 경우도, 과거 신청 기준으로 스켈레톤에 포함
+    apps.forEach(app=>{
+      extractMainDates_(app).forEach(x=>{
+        if(x.month!==ev.month||x.day<ev.startDay||x.day>ev.endDay)return;
+        if(x.dutyDays.length<2)return;
+        const key=`${x.month}/${x.day}`;
+        if(!multiNightSkeleton.has(key))multiNightSkeleton.set(key,{month:x.month,startDay:x.day,endDay:x.day+x.dutyDays.length});
+      });
     });
     [...multiNightSkeleton.entries()].sort((a,b)=>{
       const[am,ad]=a[0].split("/").map(Number),[bm,bd]=b[0].split("/").map(Number);return(am*100+ad)-(bm*100+bd);
     }).forEach(([key,v])=>{
-      barijiFold.push({label:`${v.month}/${v.startDay}~${v.month}/${v.endDay} 바라지`,key:null,names:multiNightNames.get(key)||[],readonly:true});
+      const nightKeys=[];
+      for(let d=v.startDay; d<v.endDay; d++) nightKeys.push(`bariji/${v.month}/${d}`);
+      const nightLists=nightKeys.map(k=>(nightEntryByKey[k]?nightEntryByKey[k].names:[]));
+      const names=nightLists.length?nightLists.reduce((a,b)=>a.filter(n=>b.includes(n))):[];
+      barijiFold.push({label:`${v.month}/${v.startDay}~${v.month}/${v.endDay} 바라지`,key:`multi:${nightKeys.join("|")}`,nightKeys,names,readonly:true});
     });
 
     // 이 행사 안에서 "이동" 대상으로 고를 수 있는 자리 목록
     const moveTargets=slotArr.map(s=>({key:s.key,label:`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` — ${s.activity}`:""} · 파트`}))
-      .concat(barijiFold.filter(f=>!f.readonly).map(f=>({key:f.key,label:f.label})));
+      .concat(barijiFold.map(f=>({key:f.key,label:f.readonly?`${f.label} (전체 숙박)`:f.label})));
 
     // 이 행사에 신청했는데 지금 어느 자리에도 배치되지 않은 사람 = 제외된 사람
     const placed=new Set();
@@ -2445,13 +2492,13 @@ function buildRecruitSummary_(apps){
     barijiFold.filter(f=>!f.readonly).forEach(f=>f.names.forEach(n=>placed.add(n)));
     const appliedHere=new Set();
     apps.forEach(app=>{
-      const nm=app.name||"(이름없음)";
+      const nm=cleanName_(app.name);
       extractMainDates_(app).forEach(x=>{ if(x.month===ev.month&&x.day>=ev.startDay&&x.day<=ev.endDay)appliedHere.add(nm); });
       extractPartDates_(app).forEach(x=>{ if(x.month===ev.month&&x.day>=ev.startDay&&x.day<=ev.endDay)appliedHere.add(nm); });
     });
     const excludedList=[...appliedHere].filter(n=>!placed.has(n)).map(n=>({name:n}));
 
-    return {name:ev.name||"(이름 없는 행사)",slots:slotArr,barijiFold,moveTargets,excludedList};
+    return {name:ev.name||"(이름 없는 행사)",slots:slotArr,barijiFold,moveTargets,excludedList,nameCompositeKey};
   }).filter(g=>g.slots.length);
 }
 function rsNameChip_(name,slotKey,slotLabel,gi){
@@ -2459,33 +2506,34 @@ function rsNameChip_(name,slotKey,slotLabel,gi){
   const keyArg=slotKey?`'${esc(slotKey)}'`:"null";
   return `<span class="rs-name" onclick="openRsAction(${keyArg},'${esc(slotLabel).replace(/'/g,"&#39;")}','${esc(name).replace(/'/g,"&#39;")}',${gi})">${esc(name)}</span>`;
 }
-function rsNamesHtml_(names,slotKey,slotLabel,gi){
-  return names.length?names.map(n=>rsNameChip_(n,slotKey,slotLabel,gi)).join(", "):'<i>아직 없음</i>';
+function rsNamesHtml_(names,slotKey,slotLabel,gi,keyResolver){
+  return names.length?names.map(n=>rsNameChip_(n,keyResolver?(keyResolver(n)||slotKey):slotKey,slotLabel,gi)).join(", "):'<i>아직 없음</i>';
 }
 function renderRecruitSummary_(apps){
   const box=$("recruitSummaryBox");if(!box)return;
   const groups=buildRecruitSummary_(apps);
   window.__rsGroups=groups; // 액션 패널에서 이동 대상 조회용
   if(!groups.length){box.innerHTML="";return;}
-  const roster=ensureRoster_(E());
-  const hasEdits=Object.keys(roster).length>0;
+  const ov2=ensureOverrides_();
+  const hasEdits=Object.keys(ov2.removed).length>0||Object.keys(ov2.added).length>0;
   const resetBtn=(editing&&hasEdits)?`<button class="btn btn-line" style="width:100%;margin-bottom:10px;color:var(--clay);border-color:var(--clay)" onclick="resetRecruitRoster_()">배치 조정 전체 초기화 (신청 그대로 되돌리기)</button>`:"";
   box.innerHTML=resetBtn+groups.map((g,gi)=>{
     const minis=g.slots.map(s=>{
       const dateLabel=`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` — ${esc(s.activity)}`:""}`;
       const lines=[];
-      if(s.바라지!==null)lines.push(`<div class="rs-row"><b>바라지</b><span>${rsNamesHtml_(s.바라지,s.바라지Key,dateLabel,gi)}</span></div>`);
+      if(s.바라지!==null)lines.push(`<div class="rs-row"><b>바라지</b><span>${rsNamesHtml_(s.바라지,s.바라지Key,dateLabel,gi,n=>g.nameCompositeKey[n])}</span></div>`);
       if(s.hasPart)lines.push(`<div class="rs-row"><b>파트</b><span>${rsNamesHtml_(s.파트,s.key,dateLabel,gi)}</span></div>`);
       const total=(s.바라지?s.바라지.length:0)+s.파트.length;
       return `<div class="rs-mini"><div class="rs-date">${dateLabel}<span class="rs-total">총 ${total}명</span></div>${lines.join("")}</div>`;
     }).join("");
     const foldBody=g.barijiFold.map(f=>{
-      const namesHtml=f.readonly?(f.names.length?esc(f.names.join(", ")):'아직 없음'):rsNamesHtml_(f.names,f.key,f.label,gi);
+      const namesHtml=f.readonly?(f.names.length?esc(f.names.join(", ")):'아직 없음'):rsNamesHtml_(f.names,f.key,f.label,gi,n=>g.nameCompositeKey[n]);
       const rowCls=f.readonly?"rs-fold-row rs-fold-row-total":"rs-fold-row";
       return `<div class="${rowCls}"><b>${esc(f.label)}</b><span>${namesHtml}</span></div>`;
     }).join("");
+    const barijiUniqueNames=[]; g.barijiFold.filter(f=>!f.readonly).forEach(f=>f.names.forEach(n=>pushUnique_(barijiUniqueNames,n)));
     const fold=g.barijiFold.length?`<div class="rs-fold">
-      <div class="rs-fold-head">바라지 신청자만 보기</div>
+      <div class="rs-fold-head">바라지 신청자만 보기<span class="rs-total">총 ${barijiUniqueNames.length}명</span></div>
       <div class="rs-fold-body">${foldBody||'<div class="rs-fold-row">아직 없음</div>'}</div>
     </div>`:"";
     const excludedBox=(editing&&g.excludedList.length)?`<div class="rs-excluded">
@@ -2511,34 +2559,41 @@ function openRsAction(slotKey,slotLabel,name,gi){
   $("rsActionOverlay").classList.add("show");
 }
 function closeRsAction(){ $("rsActionOverlay").classList.remove("show"); }
+function currentNamesForKey_(slotKey,group){
+  for(const s of group.slots){
+    if(s.hasPart&&s.key===slotKey)return s.파트.slice();
+    if(s.바라지Key===slotKey&&s.바라지)return s.바라지.slice();
+  }
+  for(const f of group.barijiFold){ if(!f.readonly&&f.key===slotKey)return f.names.slice(); }
+  return [];
+}
 function rsActionExclude(){
-  const g=(window.__rsGroups||[])[rsAction.gi];
-  if(!g){showToast("대상을 찾지 못했습니다");return;}
-  moveInRoster_(rsAction.name,rsAction.slotKey,null,g); // 목적지 없이 = 모든 자리에서 빼기
+  setPlacement_(rsAction.name,rsAction.slotKey,null);
   renderApplications();closeRsAction();showToast("이 행사 배치에서 뺐습니다");
 }
 function rsActionMove(){
   const to=$("rsActionMoveSelect").value;
   if(!to){showToast("옮길 자리가 없습니다");return;}
-  const g=(window.__rsGroups||[])[rsAction.gi];
-  if(!g){showToast("대상을 찾지 못했습니다");return;}
-  moveInRoster_(rsAction.name,rsAction.slotKey,to,g);
+  setPlacement_(rsAction.name,rsAction.slotKey,to);
   renderApplications();closeRsAction();showToast("옮겼습니다");
 }
 function rsActionUndo(){
-  // 이 사람이 속한 행사의 모든 자리를 자동(신청 그대로) 상태로 되돌린다
+  // 이 행사의 모든 자리에 걸린 조정(뺌/넣음)을 전부 지우고 신청 그대로로 되돌린다
   const g=(window.__rsGroups||[])[rsAction.gi];
   if(!g){showToast("대상을 찾지 못했습니다");return;}
   if(!confirm("이 행사의 배치 조정을 모두 지우고 신청 그대로 되돌릴까요?"))return;
-  const e=E();const roster=ensureRoster_(e);
-  collectSlotKeys_(g).forEach(k=>{ delete roster[k]; });
-  save();renderApplications();closeRsAction();showToast("신청 그대로 되돌렸습니다");
+  const ov=ensureOverrides_();
+  const keys=collectSlotKeys_(g);
+  keys.forEach(k=>{
+    Object.keys(ov.removed).forEach(key=>{ if(key.endsWith("@"+k))delete ov.removed[key]; });
+    Object.keys(ov.added).forEach(key=>{ if(key.endsWith("@"+k))delete ov.added[key]; });
+  });
+  saveRecruitOverrides_();renderApplications();closeRsAction();showToast("신청 그대로 되돌렸습니다");
 }
 function resetRecruitRoster_(){
   if(!confirm("지금까지 조정한 배치를 전부 지우고 신청 내용 그대로 되돌릴까요?"))return;
-  const e=E();
-  e.recruitRoster={};
-  save();renderApplications();showToast("전체 초기화했습니다");
+  RECRUIT_OVERRIDES={removed:{},added:{}};
+  saveRecruitOverrides_();renderApplications();showToast("전체 초기화했습니다");
 }
 /* ===== 사람 직접 추가 ===== */
 let rsAddGi=null;
@@ -2560,9 +2615,10 @@ function rsAddConfirm(){
   if(!to){showToast("추가할 자리가 없습니다");return;}
   const g=(window.__rsGroups||[])[rsAddGi];
   if(!g){showToast("대상을 찾지 못했습니다");return;}
-  const cur=currentNamesForKey_(to,g);
-  if(cur.includes(name)){showToast("이미 그 자리에 있습니다");return;}
-  setRoster_(to,cur.concat([name]));
+  const keys=expandTargetKey_(to);
+  const already=keys.some(k=>currentNamesForKey_(k,g).includes(name));
+  if(already){showToast("이미 그 자리에 있습니다");return;}
+  setPlacement_(name,null,to);
   renderApplications();closeRsAdd();showToast("추가했습니다");
 }
 function renderApplications(){
@@ -2591,7 +2647,7 @@ function renderApplications(){
       partTags.length?`<div class="app-sched">${partTags.join("")}</div>`:""
     ].join("");
     return `<div class="app-card">
-      <div class="app-top"><span class="app-name">${esc(a.name||"")}</span><span class="app-phone">${esc(a.phone||"")}</span></div>
+      <div class="app-top"><span class="app-name">${esc(cleanName_(a.name))}</span><span class="app-phone">${esc(a.phone||"")}</span></div>
       <div class="app-meta">${esc(a.bu||"")} ${esc(a.ji||"")} · ${esc(a.memberType||"")} ${esc(a.gender||"")}</div>
       ${schedHtml}
       ${a.motive?`<div class="app-motive">${esc(a.motive)}</div>`:""}
@@ -2600,25 +2656,6 @@ function renderApplications(){
   }).join("") || `<div class="hint-banner">표시할 신청이 없습니다.</div>`;
 }
 
-function ensurePromoHtml(){
-  if(STORE.promoHtml===undefined)STORE.promoHtml=SEED_PROMO_HTML;
-  return STORE.promoHtml;
-}
-function renderPromo(){
-  const src=ensurePromoHtml();
-  const ta=$("promoSource");if(ta&&ta.value!==src)ta.value=src;
-  refreshPromoPreview();
-}
-function refreshPromoPreview(){
-  const frame=$("promoFrame");const ta=$("promoSource");
-  if(frame&&ta)frame.srcdoc=ta.value;
-}
-function savePromoSource(){
-  const ta=$("promoSource");if(!ta)return;
-  STORE.promoHtml=ta.value;save();
-  refreshPromoPreview();
-  showToast("웹자보를 저장했습니다");
-}
 
 function copyText(text){
   if(navigator.clipboard && window.isSecureContext){
@@ -2833,7 +2870,6 @@ function goToPanel(tab,push){
   const panel=$("panel-"+tab);
   if(panel)panel.classList.add("active");
   else $("panel-stage-prep").classList.add("active");
-  if(tab==="promo")renderPromo();
   if(tab==="applications")loadApplications();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -2855,7 +2891,6 @@ function isStagePanelOrUnder(tab){
 }
 // 홈 — 지금 상황판
 /* ===== 3단계 원형 타임라인 (준비/진행/평가) ===== */
-const SEED_PROMO_HTML = "<!DOCTYPE html>\n<html lang=\"ko\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\">\n<title>밥을 먹입시다 · 8월 군청년 바라지</title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap\" rel=\"stylesheet\">\n<style>\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}\n:root{\n  --bg:#f4efe6; --paper:#fbf8f1; --ink:#34302a; --ink-soft:#6f675c;\n  --line:#e4dccd; --accent:#7a8b5f; --accent-deep:#5f6e49; --warm:#c8763f; --gold:#b89150;\n  --shadow:0 6px 24px rgba(60,52,40,.10); --radius:18px; --maxw:560px;\n}\nhtml,body{margin:0;background:#0c0c0c;}\nbody{font-family:'Gowun Dodum',sans-serif;color:var(--ink);line-height:1.7;}\n.wrap{max-width:var(--maxw);margin:0 auto;min-height:100vh;background:var(--bg);position:relative;overflow:hidden;}\n\n/* ===== 0. 영상 페이지 ===== */\n.video-stage{position:fixed;inset:0;background:#000;z-index:1000;display:flex;align-items:center;justify-content:center;}\n.video-stage.hide{display:none;}\n.video-stage iframe{width:100%;height:100%;}\n.skip-btn{position:absolute;bottom:26px;right:18px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35);\n  border-radius:20px;padding:8px 16px;font-size:12.5px;font-family:'Gowun Dodum',sans-serif;cursor:pointer;z-index:1001;}\n.tap-to-start{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;\n  background:#111;color:#fff;text-align:center;cursor:pointer;z-index:1002;gap:16px;}\n.tap-to-start.hide{display:none;}\n.tap-to-start .play-circle{width:74px;height:74px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.5);\n  display:flex;align-items:center;justify-content:center;font-size:26px;}\n.tap-to-start p{font-size:14px;color:rgba(255,255,255,.85);margin:0;padding:0 30px;}\n\n/* ===== 공통 스토리 페이지 ===== */\n.story{display:none;min-height:100vh;flex-direction:column;position:relative;}\n.story.active{display:flex;animation:fadeIn .5s ease;}\n@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}\n.story-scroll{flex:1;overflow-y:auto;padding:38px 24px 20px;-webkit-overflow-scrolling:touch;}\n.story-footer{flex:none;padding:14px 24px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(244,239,230,0),var(--bg) 40%);}\n.step-dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}\n.step-dots span{width:6px;height:6px;border-radius:50%;background:var(--line);}\n.step-dots span.on{background:var(--accent-deep);width:18px;border-radius:4px;transition:.3s;}\n.kicker{font-size:11.5px;font-weight:700;letter-spacing:.22em;color:var(--accent-deep);margin-bottom:12px;text-transform:uppercase;text-align:center;}\nh1.headline{font-family:'Gowun Batang',serif;font-size:30px;font-weight:700;text-align:center;line-height:1.4;margin:0 0 14px;color:var(--ink);}\nh1.headline .warm{color:var(--warm);}\np.sub{font-size:14.5px;color:var(--ink-soft);text-align:center;margin:0 0 28px;line-height:1.75;}\n.btn-next{display:block;width:100%;padding:16px;text-align:center;background:var(--accent-deep);color:#fff;border:none;\n  border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Gowun Dodum',sans-serif;box-shadow:var(--shadow);}\n.btn-next:active{transform:scale(.98);}\n.btn-back{background:none;border:none;color:var(--ink-soft);font-size:12.5px;padding:0 0 14px;cursor:pointer;text-align:left;}\n\n/* 일정 카드 */\n.sched{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;\n  display:flex;gap:14px;align-items:center;box-shadow:var(--shadow);}\n.sched .date{flex:none;text-align:center;width:56px;}\n.sched .date .d{font-family:'Gowun Batang',serif;font-size:22px;font-weight:700;color:var(--accent-deep);line-height:1;}\n.sched .date .m{font-size:11px;color:var(--ink-soft);margin-top:3px;}\n.sched .info{flex:1;}\n.sched .info .t{font-weight:700;font-size:15.5px;}\n.sched .info .s{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}\n.sched .info .weekday{color:var(--accent-deep);font-weight:700;}\n\n/* 카드형 리스트 (공양/활동) */\n.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:13px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:flex-start;}\n.card .emoji{flex:none;width:42px;height:42px;border-radius:12px;background:rgba(122,139,95,.12);display:flex;align-items:center;justify-content:center;font-size:21px;}\n.card h3{font-family:'Gowun Batang',serif;font-size:16.5px;font-weight:700;margin:0 0 5px;}\n.card p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.65;}\n.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px;}\n.menu-item{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:14px 10px;text-align:center;box-shadow:var(--shadow);}\n.menu-item .me{font-size:24px;margin-bottom:6px;}\n.menu-item .mn{font-size:13.5px;font-weight:700;}\n.menu-item .mt{font-size:11px;color:var(--ink-soft);margin-top:3px;}\n\n/* 일정표 */\n.day-label{display:inline-block;font-family:'Gowun Batang',serif;font-weight:700;font-size:14px;color:#b5543e;\n  background:rgba(217,140,122,.15);border-radius:8px;padding:6px 12px;margin:18px 0 10px;}\n.tt-row{display:flex;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:7px;box-shadow:var(--shadow);}\n.tt-row.prog{border-color:var(--accent);background:rgba(122,139,95,.06);}\n.tt-time{flex:none;width:70px;font-family:'Gowun Batang',serif;font-weight:700;font-size:12.5px;color:var(--ink);white-space:nowrap;}\n.tt-content{flex:1;font-size:13.5px;font-weight:600;color:var(--ink);}\n.tt-row.prog .tt-content{color:var(--accent-deep);}\n.tt-place{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}\n\n/* 신청폼 페이지 */\n.apply-hero{text-align:center;padding-top:10px;}\n.apply-hero .big-emoji{font-size:52px;margin-bottom:14px;}\niframe.gform{width:100%;border:none;min-height:70vh;background:transparent;}\n.loading-note{text-align:center;font-size:12.5px;color:var(--ink-soft);padding:20px 0;}\n</style>\n</head>\n<body>\n<div class=\"wrap\" id=\"wrap\">\n\n<!-- 0. 유튜브 영상 재생 페이지 -->\n<div class=\"video-stage\" id=\"videoStage\">\n  <div class=\"tap-to-start\" id=\"tapToStart\" onclick=\"startVideo()\">\n    <div class=\"play-circle\">▶</div>\n    <p>화면을 눌러 영상을 재생해주세요</p>\n  </div>\n  <div id=\"playerHost\" style=\"width:100%;height:100%;display:none;\"></div>\n  <button class=\"skip-btn\" onclick=\"skipVideo()\">건너뛰기 ›</button>\n</div>\n\n<!-- 1. 밥을 먹입시다 + 8월 일정 -->\n<div class=\"story\" id=\"story-1\">\n  <div class=\"story-scroll\">\n    <div class=\"step-dots\"><span class=\"on\"></span><span></span><span></span><span></span><span></span></div>\n    <div class=\"kicker\">2026년 8월 · 군청년 바라지</div>\n    <h1 class=\"headline\">밥을<br><span class=\"warm\">먹입시다</span></h1>\n    <p class=\"sub\">군에서 잠시 벗어나 마음을 쉬러 오는 청년들에게<br>따뜻한 한 끼를 지어 먹이는 봉사입니다.</p>\n    <div id=\"augustSchedule\"></div>\n  </div>\n  <div class=\"story-footer\"><button class=\"btn-next\" onclick=\"goStory(2)\">다음 ›</button></div>\n</div>\n\n<!-- 2. 공양 소개 -->\n<div class=\"story\" id=\"story-2\">\n  <div class=\"story-scroll\">\n    <div class=\"step-dots\"><span></span><span class=\"on\"></span><span></span><span></span><span></span></div>\n    <button class=\"btn-back\" onclick=\"goStory(1)\">‹ 이전</button>\n    <div class=\"kicker\">Menu</div>\n    <h1 class=\"headline\">정성으로 짓는<br><span class=\"warm\">한 그릇</span></h1>\n    <p class=\"sub\">바라지들이 새벽부터 준비하는 공양,<br>장병들이 가장 기다리는 시간입니다.</p>\n    <div class=\"menu-grid\" id=\"menuGrid\"></div>\n  </div>\n  <div class=\"story-footer\"><button class=\"btn-next\" onclick=\"goStory(3)\">다음 ›</button></div>\n</div>\n\n<!-- 3. 활동 소개 -->\n<div class=\"story\" id=\"story-3\">\n  <div class=\"story-scroll\">\n    <div class=\"step-dots\"><span></span><span></span><span class=\"on\"></span><span></span><span></span></div>\n    <button class=\"btn-back\" onclick=\"goStory(2)\">‹ 이전</button>\n    <div class=\"kicker\">Activity</div>\n    <h1 class=\"headline\">공양만 짓는 게<br>아니라, <span class=\"warm\">이런 활동</span>도 해요</h1>\n    <p class=\"sub\">밥을 짓는 일만이 봉사가 아닙니다.<br>하루 전체가 함께하는 수행의 자리예요.</p>\n    <div id=\"activityList\"></div>\n  </div>\n  <div class=\"story-footer\"><button class=\"btn-next\" onclick=\"goStory(4)\">다음 ›</button></div>\n</div>\n\n<!-- 4. 일정표 -->\n<div class=\"story\" id=\"story-4\">\n  <div class=\"story-scroll\">\n    <div class=\"step-dots\"><span></span><span></span><span></span><span class=\"on\"></span><span></span></div>\n    <button class=\"btn-back\" onclick=\"goStory(3)\">‹ 이전</button>\n    <div class=\"kicker\">Timetable</div>\n    <h1 class=\"headline\">이런 <span class=\"warm\">일정표</span>로<br>진행됩니다</h1>\n    <p class=\"sub\">2박 3일 동안의 전체 흐름입니다.</p>\n    <div id=\"ttWrap\"></div>\n  </div>\n  <div class=\"story-footer\"><button class=\"btn-next\" onclick=\"goStory(5)\">신청하러 가기 ›</button></div>\n</div>\n\n<!-- 5. 신청 페이지 -->\n<div class=\"story\" id=\"story-5\">\n  <div class=\"story-scroll\">\n    <div class=\"step-dots\"><span></span><span></span><span></span><span></span><span class=\"on\"></span></div>\n    <button class=\"btn-back\" onclick=\"goStory(4)\">‹ 이전</button>\n    <div class=\"apply-hero\">\n      <div class=\"big-emoji\">🙏</div>\n      <h1 class=\"headline\">함께 <span class=\"warm\">밥을 지어</span><br>먹여주시겠어요?</h1>\n      <p class=\"sub\">아래 신청서를 작성해주시면<br>담당자가 안내드리겠습니다.</p>\n    </div>\n    <iframe class=\"gform\" id=\"gformFrame\" src=\"\" loading=\"lazy\"></iframe>\n  </div>\n</div>\n\n</div>\n\n<\script>\nconst YT_VIDEO_ID = \"eQWuKJ79RMo\";\nconst FORM_URL = \"https://docs.google.com/forms/d/e/1FAIpQLSdWu3UalF6irPisAzsjwZSKt_ExtAmYAbVDNshfBO2L1l2b5g/viewform?embedded=true\";\n\nconst AUGUST_SCHEDULE = [\n  { d:\"13\", m:\"8월\", weekday:\"목\", title:\"서울여행 바라지\", sub:\"1박 2일 · 8월 13일(목)–14일(금)\", place:\"정토사회문화회관\" },\n  { d:\"19\", m:\"8월\", weekday:\"수\", title:\"행복학교 바라지\", sub:\"2박 3일 · 8월 19일(수)–21일(금)\", place:\"정토사회문화회관\" }\n];\n\nconst MENUS = [\n  { emoji:\"🍣\", name:\"유부초밥\", tag:\"점심 공양\" },\n  { emoji:\"🍙\", name:\"미니주먹밥\", tag:\"점심 공양\" },\n  { emoji:\"🍤\", name:\"표고버섯탕수육\", tag:\"든든한 한 그릇\" },\n  { emoji:\"🥬\", name:\"야채튀김\", tag:\"바삭한 별미\" },\n  { emoji:\"🌶️\", name:\"떡볶이\", tag:\"청년 인기 메뉴\" },\n  { emoji:\"🍜\", name:\"비건잡채\", tag:\"정성 가득\" },\n  { emoji:\"🥒\", name:\"오이절임\", tag:\"개운한 반찬\" },\n  { emoji:\"🍳\", name:\"비건햄야채볶음\", tag:\"둘째 날 저녁\" }\n];\n\nconst ACTIVITIES = [\n  { emoji:\"🍚\", title:\"군장병을 위한 공양을 만들어요\", desc:\"정성껏 준비한 음식이 청년들에게 따뜻한 한 끼가 됩니다.\" },\n  { emoji:\"🧹\", title:\"만물에는 제자리가 있습니다\", desc:\"청소와 뒷정리 또한 우리의 몫. 보이지 않는 곳을 돌보는 마음.\" },\n  { emoji:\"🪷\", title:\"짧지만 우리도 명상\", desc:\"바쁜 손길 사이, 잠시 멈추어 호흡을 바라봅니다.\" },\n  { emoji:\"🌅\", title:\"다같이 아침기도정진에 참여\", desc:\"하루를 여는 맑은 정진의 시간을 함께합니다.\" },\n  { emoji:\"🥾\", title:\"우면산 · 대성사 산책\", desc:\"숲길을 걸으며 몸과 마음을 가볍게 합니다.\" },\n  { emoji:\"💬\", title:\"법사님과의 찐~한 간담회\", desc:\"마음을 터놓고 나누는 깊은 대화의 자리.\" },\n  { emoji:\"🙋\", title:\"청년들이 묻고 유수스님이 답하는 일문일답\", desc:\"청년들의 진솔한 물음과 답을 곁에서 참관합니다.\" },\n  { emoji:\"📝\", title:\"프로그램 참여 소감 나눔\", desc:\"청년들이 무엇을 느꼈는지, 그 변화를 함께 듣습니다.\" },\n  { emoji:\"🏠\", title:\"정토사회문화회관에서 1박\", desc:\"하룻밤을 머물며 봉사자들과 함께 지냅니다.\" },\n  { emoji:\"📸\", title:\"15층 법당 구경 & 사진\", desc:\"멋진 법당을 둘러보고 기념 사진을 남길 수 있어요.\" }\n];\n\nconst TIMETABLE = [\n  { day:\"1일차\", rows:[\n      { time:\"13:30\", content:\"여는 모임\", place:\"지하1층 공양간\", prog:false },\n      { time:\"14:30\", content:\"저녁공양(준비/공양/뒷정리/나누기)\", place:\"지하1층 공양간\", prog:false },\n      { time:\"20:00\", content:\"프로그램(명상)\", place:\"예술의 전당\", prog:true },\n      { time:\"21:00\", content:\"개인정비 및 취침\", place:\"각 취침장소\", prog:false }\n  ]},\n  { day:\"2일차\", rows:[\n      { time:\"04:45\", content:\"새벽기도\", place:\"3층 설법전\", prog:false },\n      { time:\"05:45\", content:\"프로그램(아침 산책)\", place:\"대성사\", prog:true },\n      { time:\"07:00\", content:\"아침공양 및 개인정비\", place:\"지하1층\", prog:false },\n      { time:\"08:30\", content:\"프로그램(법사님 간담회)\", place:\"4층 라홀라방\", prog:true },\n      { time:\"10:40\", content:\"프로그램(명상)\", place:\"4층 라홀라방\", prog:true },\n      { time:\"11:30\", content:\"점심공양 및 휴식\", place:\"지하1층\", prog:false },\n      { time:\"13:30\", content:\"저녁공양 바라지 여는모임\", place:\"지하1층\", prog:false },\n      { time:\"14:30\", content:\"저녁공양(준비/공양/뒷정리/나누기)\", place:\"지하1층\", prog:false },\n      { time:\"20:00\", content:\"프로그램(레크레이션 관람)\", place:\"5층 중강당\", prog:true },\n      { time:\"21:00\", content:\"휴식 및 개인정비\", place:\"\", prog:false }\n  ]},\n  { day:\"3일차\", rows:[\n      { time:\"04:45\", content:\"새벽기도\", place:\"3층 설법전\", prog:false },\n      { time:\"05:45\", content:\"프로그램(아침 산책)\", place:\"대성사\", prog:true },\n      { time:\"07:00\", content:\"개인정비 및 아침공양 / 뒷마무리\", place:\"지하1층\", prog:false },\n      { time:\"08:00\", content:\"프로그램(법사님 간담회)\", place:\"4층 라홀라방\", prog:true },\n      { time:\"11:30\", content:\"점심공양\", place:\"지하1층\", prog:false },\n      { time:\"13:30\", content:\"전체 소감나누기\", place:\"5층 소강당1\", prog:false },\n      { time:\"14:30\", content:\"귀가\", place:\"\", prog:false }\n  ]}\n];\n\nfunction renderAugustSchedule(){\n  document.getElementById('augustSchedule').innerHTML = AUGUST_SCHEDULE.map(s=>`\n    <div class=\"sched\">\n      <div class=\"date\"><div class=\"d\">${s.d}</div><div class=\"m\">${s.m}</div></div>\n      <div class=\"info\">\n        <div class=\"t\">${s.title}</div>\n        <div class=\"s\">${s.sub}</div>\n        <div class=\"s\" style=\"margin-top:2px;\">${s.place}</div>\n      </div>\n    </div>\n  `).join('');\n}\nfunction renderMenu(){\n  document.getElementById('menuGrid').innerHTML = MENUS.map(m=>`\n    <div class=\"menu-item\"><div class=\"me\">${m.emoji}</div><div class=\"mn\">${m.name}</div><div class=\"mt\">${m.tag}</div></div>\n  `).join('');\n}\nfunction renderActivities(){\n  document.getElementById('activityList').innerHTML = ACTIVITIES.map(a=>`\n    <div class=\"card\"><div class=\"emoji\">${a.emoji}</div><div><h3>${a.title}</h3><p>${a.desc}</p></div></div>\n  `).join('');\n}\nfunction renderTimetable(){\n  document.getElementById('ttWrap').innerHTML = TIMETABLE.map(day=>`\n    <div class=\"day-label\">${day.day}</div>\n    ${day.rows.map(r=>`\n      <div class=\"tt-row ${r.prog?'prog':''}\">\n        <div class=\"tt-time\">${r.time}</div>\n        <div class=\"tt-content\">${r.content}${r.place?`<span class=\"tt-place\">${r.place}</span>`:''}</div>\n      </div>\n    `).join('')}\n  `).join('');\n}\n\nlet ytPlayer = null;\n\nfunction startVideo(){\n  document.getElementById('tapToStart').classList.add('hide');\n  const host = document.getElementById('playerHost');\n  host.style.display = 'block';\n  // youtube-nocookie.com + referrerpolicy 조합으로 오류153(플레이어 구성 오류) 방지\n  host.innerHTML = '<iframe id=\"ytIframe\" width=\"100%\" height=\"100%\" ' +\n    'src=\"https://www.youtube-nocookie.com/embed/' + YT_VIDEO_ID + '?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1\" ' +\n    'referrerpolicy=\"strict-origin-when-cross-origin\" ' +\n    'frameborder=\"0\" allow=\"autoplay; encrypted-media; picture-in-picture; accelerometer; gyroscope\" allowfullscreen></iframe>';\n\n  // enablejsapi로 postMessage 이벤트를 받아 영상 종료 시 자동 이동\n  window.addEventListener('message', onYTMessage);\n}\n\nfunction onYTMessage(e){\n  if(!e.data || typeof e.data !== 'string') return;\n  try{\n    const data = JSON.parse(e.data);\n    if(data.event === 'onStateChange' && data.info === 0){ // 0 = ENDED\n      goToStoryFlow();\n    }\n  }catch(err){ /* ignore non-JSON messages */ }\n}\n\nfunction skipVideo(){ goToStoryFlow(); }\nfunction goToStoryFlow(){\n  document.getElementById('videoStage').classList.add('hide');\n  goStory(1);\n}\n\nlet currentStory = 0;\nfunction goStory(n){\n  document.querySelectorAll('.story').forEach(s=>s.classList.remove('active'));\n  document.getElementById('story-'+n).classList.add('active');\n  currentStory = n;\n  window.scrollTo(0,0);\n  if(n===5){\n    const f = document.getElementById('gformFrame');\n    if(!f.src) f.src = FORM_URL;\n  }\n}\n\nrenderAugustSchedule();\nrenderMenu();\nrenderActivities();\nrenderTimetable();\n<\/script>\n</body>\n</html>";
 const SEED_VOLUNTEER_POOL = []; // 2026-07-19: 개인정보(실명·연락처 68건) 보호를 위해 소스코드에서 제거함. 기존 데이터는 별도 비공개 백업(CSV)으로 보관, 앱 내 "여러 명 붙여넣기로 추가" 기능으로 복원 가능.
 const OPENING_CEREMONY_HTML = `
 <b>0) 여는모임 식순</b><br>
@@ -2946,7 +2981,13 @@ function prepGroupsData(){
     ]},
     {key:"promo",label:"홍보",steps:[
       {id:"pool",title:"바라지 인력풀",desc:`${poolCnt}명의 인력풀${selCnt?` · ${selCnt}명 선택됨`:""} — 연락 돌릴 분들을 골라두세요.`,tab:"pool"},
-      {id:"promo",title:"바라지 홍보 웹자보",desc:"만들고 계신 웹자보를 여기서 보고 다듬으세요.",tab:"promo"},
+      {id:"promo",title:"바라지 홍보 웹자보",desc:"신청앱 주소를 확인하고 열어볼 수 있습니다.",extraId:"ex-promo",
+        extra:`<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:10px">아래 주소가 실제로 배포된 신청 페이지입니다. 이 주소를 그대로 공유하시면 됩니다.</div>
+        <div class="promo-url-box">${esc(PROMO_APP_URL)}</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-line" style="flex:1;justify-content:center" onclick="copyText('${PROMO_APP_URL}')">주소 복사</button>
+          <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="window.open('${PROMO_APP_URL}','_blank')">열어보기</button>
+        </div>`},
       {id:"recruitcheck",title:"모집 현황 파악",desc:"신청현황을 모아서 보여줍니다.",tab:"applications"},
     ]},
     {key:"comm",label:"소통",steps:[
