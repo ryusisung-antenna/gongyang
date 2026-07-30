@@ -152,7 +152,7 @@
   .app-card{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:8px;background:var(--card);box-shadow:var(--shadow);}
   .app-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
   .app-name{font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--ink);}
-  .app-phone{font-size:12px;color:var(--ink-soft);}
+  .app-phone{font-size:12px;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:2px;}
   .app-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
   .app-sched{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px;}
   .app-tag{font-size:11px;border:1px solid var(--line);border-radius:20px;padding:2px 9px;color:var(--ink);background:var(--bg);}
@@ -196,7 +196,13 @@
   .mini-check-row.done .mini-check-text-input{color:var(--ink-faint);text-decoration:line-through;}
   .mini-check-row.done .mini-check-text{color:var(--ink-faint);text-decoration:line-through;}
   .mini-check-del{flex:none;background:none;border:none;color:var(--ink-faint);font-size:11px;cursor:pointer;padding:2px 4px;}
-  .mini-check-add{margin-top:8px;}
+  .mini-check-add{margin-top:8px;display:flex;gap:6px;}
+  .mini-check-add input{flex:1;min-width:0;}
+  .comms-scope-select{flex:none;width:78px;font-size:11.5px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);padding:6px 4px;font-family:var(--sans);}
+  .scope-tag{flex:none;font-size:10px;font-weight:600;border-radius:20px;padding:2px 8px;cursor:pointer;white-space:nowrap;}
+  .scope-tag.scope-common{background:var(--panel-2);color:var(--ink-soft);}
+  .scope-tag.scope-seoul{background:rgba(143,176,78,.15);color:var(--green-deep);}
+  .scope-tag.scope-happy{background:rgba(199,126,78,.15);color:var(--clay);}
   .mini-check-add input{width:100%;border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:5px;padding:7px 9px;font-size:12.5px;font-family:var(--sans);}
   /* 기초정보 강조 카드 */
   .flow-step.highlight{background:rgba(143,176,78,.10);border-color:var(--green);}
@@ -523,7 +529,7 @@
     <button class="event-add-btn" onclick="openWizard(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M12 5v14M5 12h14"/></svg>새 행사</button>
   </div>
   <div class="ctx">
-    <span id="kindPill">서행</span>
+    <span id="kindPill">서울여행</span>
     <span class="dotsep">·</span>
     <label>일정</label><input id="ctx-date" placeholder="○/○~○/○">
     <span class="dotsep">·</span>
@@ -774,7 +780,7 @@
     <div class="wizard-q">
       <label>3. 이번 행사는 어떤 행사인가요?</label>
       <div class="wizard-kind">
-        <button type="button" class="wz-kind-btn active" data-kind="서행" onclick="wzPickKind('서행')">서행<span>1박2일 · 저녁 1끼</span></button>
+        <button type="button" class="wz-kind-btn active" data-kind="서행" onclick="wzPickKind('서행')">서울여행<span>1박2일 · 저녁 1끼</span></button>
         <button type="button" class="wz-kind-btn" data-kind="행학" onclick="wzPickKind('행학')">행복학교<span>2박3일 · 저녁 2끼</span></button>
       </div>
     </div>
@@ -837,11 +843,7 @@ function blankEvent(name,kind){
     receipts:[], discount:0,
     memoTagList:["현장","간담회","나누기","총평"], memos:[],
     evalReflection:"", evalLinks:{survey:"",nextForm:""},
-    commsChecklist:{notice:[
-      {t:"일정·장소 안내",d:false},{t:"공양 인원·메뉴 안내",d:false},{t:"준비물 안내",d:false},{t:"집결 시간·교통편",d:false}
-    ],coord:[
-      {t:"공양 인원 최종 확정",d:false},{t:"바라지 명단 공유",d:false},{t:"당일 역할 분담 확인",d:false}
-    ]},
+    commsDone:{notice:{},coord:{}}, // 항목 자체는 공통 저장소(STORE.commsItems)에 있고, 완료 여부만 행사별로 따로 기억
     openingCeremony:"", cookDone:{}, openNoticeText:"",
     meetingEval:{agenda:"",notes:"",feedback:""},
   };
@@ -892,7 +894,9 @@ function migrateEvent(ev){
   if(!ev.buyChecked)ev.buyChecked={};
   if(ev.evalReflection===undefined)ev.evalReflection="";
   if(!ev.evalLinks)ev.evalLinks={survey:"",nextForm:""};
-  if(!ev.commsChecklist)ev.commsChecklist={notice:[],coord:[]};
+  if(!ev.commsDone)ev.commsDone={notice:{},coord:{}};
+  if(!ev.commsDone.notice)ev.commsDone.notice={};
+  if(!ev.commsDone.coord)ev.commsDone.coord={};
   if(ev.openingCeremony===undefined)ev.openingCeremony="";
   if(!ev.cookDone)ev.cookDone={};
   if(ev.openNoticeText===undefined)ev.openNoticeText="";
@@ -930,9 +934,40 @@ function migratePantry(s){
 function loadStore(){
   try{
     const raw=localStorage.getItem("gongyang_v3");
-    if(raw){const s=JSON.parse(raw);if(s.events&&s.events.length){migratePantry(s);s.events.forEach(migrateEvent);return s;}}
+    if(raw){const s=JSON.parse(raw);if(s.events&&s.events.length){migratePantry(s);s.events.forEach(migrateEvent);ensureCommsItems_(s);return s;}}
   }catch(e){}
-  return {events:[seedFirstEvent()], active:0, pantry:{"1일차저녁":{},"2일차저녁":{},"아침":{}}};
+  const s0={events:[seedFirstEvent()], active:0, pantry:{"1일차저녁":{},"2일차저녁":{},"아침":{}}};
+  ensureCommsItems_(s0);
+  return s0;
+}
+// 소통 체크리스트 항목("소통방에 공지하기"/"꼭지들과 소통하기")을 행사마다 따로 두지 않고 한 곳에서 관리한다.
+// 항목에는 공통/서행/행학 태그가 붙고, 행사를 열면 공통 + 그 행사 종류에 맞는 항목만 보인다.
+// 완료 여부(체크)는 행사별로 따로 기억한다(ev.commsDone).
+function commsMkId_(){ return "ci"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function ensureCommsItems_(store){
+  if(store.commsItems)return store.commsItems;
+  store.commsItems={notice:[],coord:[]};
+  const seen={notice:new Set(),coord:new Set()};
+  (store.events||[]).forEach(ev=>{
+    if(!ev.commsChecklist)return;
+    ["notice","coord"].forEach(which=>{
+      (ev.commsChecklist[which]||[]).forEach(item=>{
+        const t=(item.t||"").trim();
+        if(!t||seen[which].has(t))return;
+        seen[which].add(t);
+        store.commsItems[which].push({id:commsMkId_(),t,scope:"공통"});
+      });
+    });
+    delete ev.commsChecklist; // 공통 저장소로 옮겼으니 예전 자리는 정리
+  });
+  if(store.commsItems.notice.length+store.commsItems.coord.length===0){
+    // 옮겨올 예전 데이터가 아예 없던 경우(새 설치) 기본 항목을 심어준다
+    store.commsItems={
+      notice:[{id:commsMkId_(),t:"일정·장소 안내",scope:"공통"},{id:commsMkId_(),t:"공양 인원·메뉴 안내",scope:"공통"},{id:commsMkId_(),t:"준비물 안내",scope:"공통"},{id:commsMkId_(),t:"집결 시간·교통편",scope:"공통"}],
+      coord:[{id:commsMkId_(),t:"공양 인원 최종 확정",scope:"공통"},{id:commsMkId_(),t:"바라지 명단 공유",scope:"공통"},{id:commsMkId_(),t:"당일 역할 분담 확인",scope:"공통"}]
+    };
+  }
+  return store.commsItems;
 }
 // 공용 주방 재고: {slot: {품목명: 수량}} — slot별로 보관, 행사와 독립적·공유
 // slot = "1일차저녁" | "2일차저녁" | "아침"
@@ -962,7 +997,7 @@ function renderEventSelect(){
 function switchEvent(i){STORE.active=+i;selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();save();}
 function newEvent(){
   const name=prompt("새 행사 이름 (예: 7월 군전법)");if(!name||!name.trim())return;
-  const k=prompt("행사 종류를 고르세요.\n  1 = 서행 (1박2일, 저녁 1끼)\n  2 = 행학 (2박3일, 저녁 2끼)\n\n번호를 입력하세요.","1");
+  const k=prompt("행사 종류를 고르세요.\n  1 = 서울여행 (1박2일, 저녁 1끼)\n  2 = 행복학교 (2박3일, 저녁 2끼)\n\n번호를 입력하세요.","1");
   const kind=(k==="2")?"행학":"서행";
   let base=null;
   if(STORE.events.length && confirm("같은 종류의 지난 행사 내용(체크리스트·일감 구성·재료 수정·공지)을 복사해서 시작할까요?\n\n[확인] 복사해서 시작   [취소] 빈 행사로 시작")){
@@ -1088,7 +1123,7 @@ function submitWizard(){
   showToast(wzEditMode?"저장했습니다":"새 행사를 시작합니다");
 }
 function manageEvent(){
-  const choice=prompt(`현재 행사: "${E().name}" (${E().kind})\n\n무엇을 할까요?\n  1 = 이름 바꾸기\n  2 = 이 행사 삭제\n  3 = 종류 바꾸기 (서행↔행학)\n\n번호를 입력하세요.`);
+  const choice=prompt(`현재 행사: "${E().name}" (${kindLabel_(E().kind)})\n\n무엇을 할까요?\n  1 = 이름 바꾸기\n  2 = 이 행사 삭제\n  3 = 종류 바꾸기 (서울여행↔행복학교)\n\n번호를 입력하세요.`);
   if(choice==="1"){const n=prompt("새 이름",E().name);if(n&&n.trim()){E().name=n.trim();renderEventSelect();renderHeaderKind();save();}}
   else if(choice==="2"){
     if(STORE.events.length<=1){alert("행사가 하나뿐이라 삭제할 수 없습니다.");return;}
@@ -1098,7 +1133,7 @@ function manageEvent(){
   }
   else if(choice==="3"){
     const cur=E().kind;const next=(cur==="서행")?"행학":"서행";
-    if(confirm(`종류를 ${cur} → ${next} 로 바꿀까요?\n\n일감 구성이 ${next}에 맞게 다시 짜입니다. (배정된 사람은 초기화됩니다)`)){
+    if(confirm(`종류를 ${kindLabel_(cur)} → ${kindLabel_(next)} 로 바꿀까요?\n\n일감 구성이 ${kindLabel_(next)}에 맞게 다시 짜입니다. (배정된 사람은 초기화됩니다)`)){
       const e=E();e.kind=next;e.taskBlocks=makeTaskBlocks(next);
       const d1=(e.peopleByDay&&e.peopleByDay[1])?e.peopleByDay[1].slice():["류시성"];
       if(next==="행학")e.peopleByDay={1:d1,2:(e.peopleByDay&&e.peopleByDay[2]?e.peopleByDay[2].slice():d1.slice())};
@@ -1169,6 +1204,8 @@ function setUnitForItem(name,newUnit){
 }
 
 function $(id){return document.getElementById(id);}
+// 내부 코드값(서행/행학)은 그대로 두고, 화면에 보이는 이름만 여기서 바꾼다
+function kindLabel_(kind){ return kind==="행학"?"행복학교":"서울여행"; }
 // PC 크롬에서 inputmode="numeric"이 IME를 영어로 강제 전환하는 문제가 있어, 모바일(터치 기기)에서만 적용
 const IS_TOUCH = window.matchMedia && window.matchMedia("(hover:none) and (pointer:coarse)").matches;
 const NUM_MODE = IS_TOUCH ? 'inputmode="numeric"' : '';
@@ -1230,7 +1267,7 @@ function edgeScroll(clientY){
 
 function renderHeaderKind(){
   const e=E();const pill=$("kindPill");if(!pill)return;
-  pill.textContent=e.kind;
+  pill.textContent=kindLabel_(e.kind);
   const c=(e.kind==="행학")?"var(--clay)":"var(--green)";
   pill.style.color=c;
   pill.style.borderColor=c;
@@ -1955,28 +1992,60 @@ function renderRecipes(){
 function addRecipe(){ensureRecipes().unshift({title:"새 아이디어",body:""});renderRecipes();save();}
 function delRecipe(i){if(!confirm("이 레시피 아이디어를 삭제할까요?"))return;STORE.recipes.splice(i,1);renderRecipes();save();}
 /* ===== 소통관련 미니 체크리스트 ===== */
+const SCOPE_ORDER=["공통","서행","행학"];
+function scopeLabel_(scope){ return scope==="공통"?"공통":kindLabel_(scope); }
+function scopeClass_(scope){ return scope==="공통"?"scope-common":(scope==="행학"?"scope-happy":"scope-seoul"); }
 function commsChecklistHtml(which){
-  const e=E();if(!e.commsChecklist)e.commsChecklist={notice:[],coord:[]};
-  const list=e.commsChecklist[which]||[];
-  return `<div class="mini-checklist">`+list.map((item,i)=>`
-    <div class="mini-check-row ${item.d?'done':''}">
-      <span class="mini-check" onclick="toggleCommsItem('${which}',${i})"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-      <textarea rows="1" class="mini-check-text-input" oninput="autoGrowTA(this)" onchange="editCommsItem('${which}',${i},this.value)">${esc(item.t)}</textarea>
-      <button class="mini-check-del" onclick="delCommsItem('${which}',${i})">✕</button>
+  const e=E();
+  const items=ensureCommsItems_(STORE)[which].filter(it=>it.scope==="공통"||it.scope===e.kind);
+  const done=e.commsDone[which];
+  return `<div class="mini-checklist">`+items.map(item=>`
+    <div class="mini-check-row ${done[item.id]?'done':''}">
+      <span class="mini-check" onclick="toggleCommsItem('${which}','${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <textarea rows="1" class="mini-check-text-input" oninput="autoGrowTA(this)" onchange="editCommsItem('${which}','${item.id}',this.value)">${esc(item.t)}</textarea>
+      <span class="scope-tag ${scopeClass_(item.scope)}" onclick="cycleCommsScope('${which}','${item.id}')" title="눌러서 공통/서울여행/행복학교 전환">${scopeLabel_(item.scope)}</span>
+      <button class="mini-check-del" onclick="delCommsItem('${which}','${item.id}')">✕</button>
     </div>`).join("")+
-    `<div class="mini-check-add"><input type="text" id="commsAdd-${which}" placeholder="항목 추가 (엔터)" onkeydown="if(event.key==='Enter')addCommsItem('${which}')"></div>
+    `<div class="mini-check-add">
+      <select id="commsAddScope-${which}" class="comms-scope-select">
+        <option value="공통">공통</option>
+        <option value="서행">서울여행</option>
+        <option value="행학">행복학교</option>
+      </select>
+      <input type="text" id="commsAdd-${which}" placeholder="항목 추가 (엔터)" onkeydown="if(event.key==='Enter')addCommsItem('${which}')">
+    </div>
   </div>`;
 }
-function toggleCommsItem(which,i){const e=E();e.commsChecklist[which][i].d=!e.commsChecklist[which][i].d;save();renderPrepTimeline();}
-function editCommsItem(which,i,v){
-  const e=E();const t=v.trim();
-  if(!t){e.commsChecklist[which].splice(i,1);}else{e.commsChecklist[which][i].t=t;}
+function toggleCommsItem(which,id){
+  const e=E();e.commsDone[which][id]=!e.commsDone[which][id];save();renderPrepTimeline();
+}
+function editCommsItem(which,id,v){
+  const t=v.trim();
+  const items=ensureCommsItems_(STORE)[which];
+  const idx=items.findIndex(x=>x.id===id);
+  if(idx<0)return;
+  if(!t){items.splice(idx,1);}else{items[idx].t=t;}
   save();renderPrepTimeline();
 }
-function delCommsItem(which,i){const e=E();e.commsChecklist[which].splice(i,1);save();renderPrepTimeline();}
+function delCommsItem(which,id){
+  const items=ensureCommsItems_(STORE)[which];
+  const idx=items.findIndex(x=>x.id===id);
+  if(idx>=0)items.splice(idx,1);
+  save();renderPrepTimeline();
+}
+function cycleCommsScope(which,id){
+  const item=ensureCommsItems_(STORE)[which].find(x=>x.id===id);
+  if(!item)return;
+  const i=SCOPE_ORDER.indexOf(item.scope);
+  item.scope=SCOPE_ORDER[(i+1)%SCOPE_ORDER.length];
+  save();renderPrepTimeline();
+}
 function addCommsItem(which){
   const inp=$("commsAdd-"+which);const v=inp.value.trim();if(!v)return;
-  const e=E();e.commsChecklist[which].push({t:v,d:false});save();renderPrepTimeline();
+  const scopeSel=$("commsAddScope-"+which);
+  const scope=scopeSel?scopeSel.value:"공통";
+  ensureCommsItems_(STORE)[which].push({id:commsMkId_(),t:v,scope});
+  save();renderPrepTimeline();
   requestAnimationFrame(()=>{const ni=$("commsAdd-"+which);if(ni)ni.focus();});
 }
 
@@ -2373,6 +2442,13 @@ function collectSlotKeys_(group){
 }
 function pushUnique_(arr,name){ if(!arr.includes(name))arr.push(name); }
 function cleanName_(name){ return String(name||"").trim()||"(이름없음)"; }
+// 전화번호를 누르면 문자 앱이 열리도록. PC에서는 문자 앱이 안 열릴 수 있어 번호를 클립보드에도 같이 복사한다.
+function phoneLinkHtml_(phone){
+  if(!phone)return "";
+  const digits=String(phone).replace(/[^\d+]/g,"");
+  const safe=esc(phone).replace(/'/g,"&#39;");
+  return `<a class="app-phone" href="sms:${digits}" onclick="copyText('${safe}')">${esc(phone)}</a>`;
+}
 function buildRecruitSummary_(apps){
   const ov=ensureOverrides_();
   const mainEvents=EVENT_SCHEDULES.filter(s=>s.type==="main"&&s.status!=="cancelled");
@@ -2647,7 +2723,7 @@ function renderApplications(){
       partTags.length?`<div class="app-sched">${partTags.join("")}</div>`:""
     ].join("");
     return `<div class="app-card">
-      <div class="app-top"><span class="app-name">${esc(cleanName_(a.name))}</span><span class="app-phone">${esc(a.phone||"")}</span></div>
+      <div class="app-top"><span class="app-name">${esc(cleanName_(a.name))}</span>${phoneLinkHtml_(a.phone)}</div>
       <div class="app-meta">${esc(a.bu||"")} ${esc(a.ji||"")} · ${esc(a.memberType||"")} ${esc(a.gender||"")}</div>
       ${schedHtml}
       ${a.motive?`<div class="app-motive">${esc(a.motive)}</div>`:""}
@@ -3006,7 +3082,7 @@ function selectPrepSegment(key){prepSegment=key;renderPrepTimeline();}
 function renderPrepTimeline(){
   const el=$("prepTimeline");if(!el)return;
   const e=E();if(!e){el.innerHTML="";return;}
-  const infoStep=[{id:"info",title:"기초 정보 확인",highlight:true,desc:`${esc(e.name)} · ${e.ctx.date||"일정 미정"} · ${e.kind==="행학"?"행복학교":"서행"} · 총 ${e.ctx.count||0}명`,extraId:"ex-info",
+  const infoStep=[{id:"info",title:"기초 정보 확인",highlight:true,desc:`${esc(e.name)} · ${e.ctx.date||"일정 미정"} · ${kindLabel_(e.kind)} · 총 ${e.ctx.count||0}명`,extraId:"ex-info",
     extra:`<button class="btn btn-line btn-sm" onclick="openWizard(false,true)">이름·일정·인원 수정하기</button>`}];
   const groups=prepGroupsData();
   const segHtml=`<div class="prep-segments">`+groups.map(g=>{
@@ -3148,7 +3224,7 @@ async function autoLoadOnOpen(force){
         lastKnownCloudEventCount=s.events.length;
         const cur=JSON.stringify(STORE);
         if(JSON.stringify(s)!==cur){
-          STORE=s;if(!STORE.pantry)STORE.pantry={};migratePantry(STORE);STORE.events.forEach(migrateEvent);
+          STORE=s;if(!STORE.pantry)STORE.pantry={};migratePantry(STORE);STORE.events.forEach(migrateEvent);ensureCommsItems_(STORE);
           STORE.active=Math.min(STORE.active||0,STORE.events.length-1);
           localStorage.setItem("gongyang_v3",JSON.stringify(STORE));
           selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();
@@ -3241,7 +3317,7 @@ async function cloudLoad(){
     if(!text||!text.trim()){showToast("클라우드가 비어 있습니다 (먼저 PC에서 저장하세요)");return;}
     const s=JSON.parse(text);
     if(!s.events||!s.events.length){showToast("클라우드 데이터 형식이 맞지 않습니다");return;}
-    STORE=s;if(!STORE.pantry)STORE.pantry={};migratePantry(STORE);STORE.events.forEach(migrateEvent);
+    STORE=s;if(!STORE.pantry)STORE.pantry={};migratePantry(STORE);STORE.events.forEach(migrateEvent);ensureCommsItems_(STORE);
     STORE.active=Math.min(STORE.active||0,STORE.events.length-1);
     save();selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();
     lastSavedPayload=JSON.stringify(STORE);lastKnownCloudEventCount=STORE.events.length;syncReady=true;
@@ -3258,7 +3334,7 @@ function exportData(){
 }
 function importData(e){
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const s=JSON.parse(r.result);if(s.events&&s.events.length){STORE=s;if(!STORE.pantry)STORE.pantry={};STORE.events.forEach(migrateEvent);STORE.active=Math.min(STORE.active||0,STORE.events.length-1);}else{alert("형식이 맞지 않습니다");return;}save();selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();showToast("불러왔습니다");}catch(err){alert("파일을 읽을 수 없습니다");}};
+  r.onload=()=>{try{const s=JSON.parse(r.result);if(s.events&&s.events.length){STORE=s;if(!STORE.pantry)STORE.pantry={};STORE.events.forEach(migrateEvent);ensureCommsItems_(STORE);STORE.active=Math.min(STORE.active||0,STORE.events.length-1);}else{alert("형식이 맞지 않습니다");return;}save();selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();showToast("불러왔습니다");}catch(err){alert("파일을 읽을 수 없습니다");}};
   r.readAsText(f);
 }
 
