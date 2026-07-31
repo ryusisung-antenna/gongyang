@@ -159,7 +159,8 @@
   .recruit-summary-group{margin-bottom:14px;}
   .rs-event{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--green-deep);padding-bottom:8px;border-bottom:2px solid var(--green-deep);margin-bottom:10px;}
   .rs-mini{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow);}
-  .rs-date{font-family:var(--serif);font-weight:700;font-size:12.5px;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  .rs-date{font-family:var(--serif);font-weight:700;font-size:12.5px;color:var(--ink);display:flex;flex-wrap:wrap;row-gap:3px;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  .rs-date>span:first-child{flex:1 1 auto;min-width:0;}
   .rs-total{font-family:var(--sans);font-weight:600;font-size:11px;color:var(--green-deep);display:inline-flex;align-items:center;gap:6px;}
   .rs-date-right{display:flex;align-items:center;gap:7px;flex:none;}
   .rs-pill{font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 10px;cursor:pointer;border:1px solid var(--line);color:var(--ink-soft);background:var(--card);}
@@ -173,7 +174,7 @@
   .rs-fold-row-total{border-top:1px dashed var(--green);margin-top:4px;padding-top:6px;}
   .rs-fold-row-total b{color:var(--green-deep);}
   .rs-row b{flex:none;color:var(--clay);font-weight:700;white-space:nowrap;}
-  .rs-row span{color:var(--ink-soft);}
+  .rs-row span{color:var(--ink-soft);word-break:keep-all;overflow-wrap:normal;}
   .rs-row i{color:var(--ink-faint);font-style:normal;}
   .rs-name{cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:2px;}
   .rs-name:active{color:var(--green-deep);}
@@ -2590,7 +2591,7 @@ function buildRecruitSummary_(apps){
     });
 
     // 이 행사 안에서 "이동" 대상으로 고를 수 있는 자리 목록
-    const moveTargets=slotArr.map(s=>({key:s.key,label:`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` — ${s.activity}`:""} · 파트`}))
+    const moveTargets=slotArr.map(s=>({key:s.key,label:`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` · ${s.activity}`:""} · 파트`}))
       .concat(barijiFold.map(f=>({key:f.key,label:f.readonly?`${f.label} (전체 숙박)`:f.label})));
 
     // 이 행사에 신청했는데 지금 어느 자리에도 배치되지 않은 사람 = 제외된 사람
@@ -2626,7 +2627,7 @@ function renderRecruitSummary_(apps){
   const resetBtn=(editing&&hasEdits)?`<button class="btn btn-line" style="width:100%;margin-bottom:10px;color:var(--clay);border-color:var(--clay)" onclick="resetRecruitRoster_()">배치 조정 전체 초기화 (신청 그대로 되돌리기)</button>`:"";
   box.innerHTML=resetBtn+groups.map((g,gi)=>{
     const minis=g.slots.map(s=>{
-      const dateLabel=`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` — ${esc(s.activity)}`:""}`;
+      const dateLabel=`${s.month}/${s.day}(${weekdayKo_(s.month,s.day)})${s.activity?` · ${esc(s.activity)}`:""}`;
       const lines=[];
       if(s.바라지!==null)lines.push(`<div class="rs-row"><b>바라지</b><span>${rsNamesHtml_(s.바라지,s.바라지Key,dateLabel,gi,n=>g.nameCompositeKey[n])}</span></div>`);
       if(s.hasPart)lines.push(`<div class="rs-row"><b>파트</b><span>${rsNamesHtml_(s.파트,s.key,dateLabel,gi)}</span></div>`);
