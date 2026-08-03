@@ -91,7 +91,7 @@
   .flow-step-title{font-family:var(--serif);font-size:14.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;}
   .flow-step-title .ext-badge{font-size:10px;font-weight:500;color:var(--ink-faint);border:1px solid var(--line);border-radius:20px;padding:1px 8px;font-family:var(--sans);}
   .flow-step-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.55;}
-  .flow-step-extra{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.7;color:var(--ink);cursor:default;}
+  .flow-step-extra{margin-top:10px;background:none;border:none;padding:0;font-size:13.5px;line-height:1.7;color:var(--ink);cursor:default;}
   .flow-step-extra.hidden{display:none;}
   .flow-substage{font-family:var(--serif);font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.06em;margin:22px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
   .flow-substage:first-child{margin-top:2px;}
@@ -146,6 +146,7 @@
   .pool-name{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--ink);}
   .pool-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
   .pool-phone{font-size:12px;color:var(--ink-faint);flex:none;}
+  .pool-phone .app-phone{color:var(--ink-faint);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:2px;}
   /* 웹자보 */
   .promo-url-box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink);word-break:break-all;line-height:1.5;}
   /* 신청현황 */
@@ -202,11 +203,6 @@
   .mini-check-del{flex:none;background:none;border:none;color:var(--ink-faint);font-size:11px;cursor:pointer;padding:2px 4px;}
   .mini-check-add{margin-top:8px;display:flex;gap:6px;}
   .mini-check-add input{flex:1;min-width:0;}
-  .comms-scope-select{flex:none;width:78px;font-size:11.5px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);padding:6px 4px;font-family:var(--sans);}
-  .scope-tag{flex:none;font-size:10px;font-weight:600;border-radius:20px;padding:2px 8px;cursor:pointer;white-space:nowrap;}
-  .scope-tag.scope-common{background:var(--panel-2);color:var(--ink-soft);}
-  .scope-tag.scope-seoul{background:rgba(143,176,78,.15);color:var(--green-deep);}
-  .scope-tag.scope-happy{background:rgba(199,126,78,.15);color:var(--clay);}
   .mini-check-add input{width:100%;border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:5px;padding:7px 9px;font-size:12.5px;font-family:var(--sans);}
   /* 기초정보 강조 카드 */
   .flow-step.highlight{background:rgba(143,176,78,.10);border-color:var(--green);}
@@ -219,7 +215,10 @@
   .plain-list li{font-size:12.5px;color:var(--ink-soft);padding-left:12px;position:relative;margin-bottom:4px;}
   .plain-list li::before{content:"";position:absolute;left:0;top:7px;width:3px;height:3px;border-radius:50%;background:var(--ink-faint);}
   /* 인라인 텍스트에어리어 */
-  .inline-textarea{width:100%;min-height:60px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:10px;font-family:var(--sans);font-size:13.5px;line-height:1.6;resize:none;overflow:hidden;}
+  .inline-textarea{width:100%;min-height:80px;border:none;border-bottom:2px solid var(--line);background:none;color:var(--ink);border-radius:0;padding:8px 2px;font-family:var(--sans);font-size:13.5px;line-height:1.6;resize:none;overflow:hidden;}
+  .inline-textarea:focus{border-bottom-color:var(--green);outline:none;}
+  .inline-input{width:100%;border:none;border-bottom:2px solid var(--line);background:none;color:var(--ink);border-radius:0;padding:8px 2px;font-family:var(--sans);font-size:13.5px;box-sizing:border-box;}
+  .inline-input:focus{border-bottom-color:var(--green);outline:none;}
   /* 여는모임 진행 편집기 */
   .oc-editor{font-size:13px;line-height:1.75;}
   .oc-editor.editable{outline:1px dashed var(--gold-soft);outline-offset:6px;border-radius:4px;cursor:text;}
@@ -959,7 +958,7 @@ function ensureCommsItems_(store){
         const t=(item.t||"").trim();
         if(!t||seen[which].has(t))return;
         seen[which].add(t);
-        store.commsItems[which].push({id:commsMkId_(),t,scope:"공통"});
+        store.commsItems[which].push({id:commsMkId_(),t});
       });
     });
     delete ev.commsChecklist; // 공통 저장소로 옮겼으니 예전 자리는 정리
@@ -967,8 +966,8 @@ function ensureCommsItems_(store){
   if(store.commsItems.notice.length+store.commsItems.coord.length===0){
     // 옮겨올 예전 데이터가 아예 없던 경우(새 설치) 기본 항목을 심어준다
     store.commsItems={
-      notice:[{id:commsMkId_(),t:"일정·장소 안내",scope:"공통"},{id:commsMkId_(),t:"공양 인원·메뉴 안내",scope:"공통"},{id:commsMkId_(),t:"준비물 안내",scope:"공통"},{id:commsMkId_(),t:"집결 시간·교통편",scope:"공통"}],
-      coord:[{id:commsMkId_(),t:"공양 인원 최종 확정",scope:"공통"},{id:commsMkId_(),t:"바라지 명단 공유",scope:"공통"},{id:commsMkId_(),t:"당일 역할 분담 확인",scope:"공통"}]
+      notice:[{id:commsMkId_(),t:"일정·장소 안내"},{id:commsMkId_(),t:"공양 인원·메뉴 안내"},{id:commsMkId_(),t:"준비물 안내"},{id:commsMkId_(),t:"집결 시간·교통편"}],
+      coord:[{id:commsMkId_(),t:"공양 인원 최종 확정"},{id:commsMkId_(),t:"바라지 명단 공유"},{id:commsMkId_(),t:"당일 역할 분담 확인"}]
     };
   }
   return store.commsItems;
@@ -1996,26 +1995,17 @@ function renderRecipes(){
 function addRecipe(){ensureRecipes().unshift({title:"새 아이디어",body:""});renderRecipes();save();}
 function delRecipe(i){if(!confirm("이 레시피 아이디어를 삭제할까요?"))return;STORE.recipes.splice(i,1);renderRecipes();save();}
 /* ===== 소통관련 미니 체크리스트 ===== */
-const SCOPE_ORDER=["공통","서행","행학"];
-function scopeLabel_(scope){ return scope==="공통"?"공통":kindLabel_(scope); }
-function scopeClass_(scope){ return scope==="공통"?"scope-common":(scope==="행학"?"scope-happy":"scope-seoul"); }
 function commsChecklistHtml(which){
   const e=E();
-  const items=ensureCommsItems_(STORE)[which].filter(it=>it.scope==="공통"||it.scope===e.kind);
+  const items=ensureCommsItems_(STORE)[which];
   const done=e.commsDone[which];
   return `<div class="mini-checklist">`+items.map(item=>`
     <div class="mini-check-row ${done[item.id]?'done':''}">
       <span class="mini-check" onclick="toggleCommsItem('${which}','${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <textarea rows="1" class="mini-check-text-input" oninput="autoGrowTA(this)" onchange="editCommsItem('${which}','${item.id}',this.value)">${esc(item.t)}</textarea>
-      <span class="scope-tag ${scopeClass_(item.scope)}" onclick="cycleCommsScope('${which}','${item.id}')" title="눌러서 공통/서울여행/행복학교 전환">${scopeLabel_(item.scope)}</span>
       <button class="mini-check-del" onclick="delCommsItem('${which}','${item.id}')">✕</button>
     </div>`).join("")+
     `<div class="mini-check-add">
-      <select id="commsAddScope-${which}" class="comms-scope-select">
-        <option value="공통">공통</option>
-        <option value="서행">서울여행</option>
-        <option value="행학">행복학교</option>
-      </select>
       <input type="text" id="commsAdd-${which}" placeholder="항목 추가 (엔터)" onkeydown="if(event.key==='Enter')addCommsItem('${which}')">
     </div>
   </div>`;
@@ -2037,18 +2027,9 @@ function delCommsItem(which,id){
   if(idx>=0)items.splice(idx,1);
   save();renderPrepTimeline();
 }
-function cycleCommsScope(which,id){
-  const item=ensureCommsItems_(STORE)[which].find(x=>x.id===id);
-  if(!item)return;
-  const i=SCOPE_ORDER.indexOf(item.scope);
-  item.scope=SCOPE_ORDER[(i+1)%SCOPE_ORDER.length];
-  save();renderPrepTimeline();
-}
 function addCommsItem(which){
   const inp=$("commsAdd-"+which);const v=inp.value.trim();if(!v)return;
-  const scopeSel=$("commsAddScope-"+which);
-  const scope=scopeSel?scopeSel.value:"공통";
-  ensureCommsItems_(STORE)[which].push({id:commsMkId_(),t:v,scope});
+  ensureCommsItems_(STORE)[which].push({id:commsMkId_(),t:v});
   save();renderPrepTimeline();
   requestAnimationFrame(()=>{const ni=$("commsAdd-"+which);if(ni)ni.focus();});
 }
@@ -2197,7 +2178,7 @@ function renderPool(){
         <div class="pool-name">${esc(p.name)}</div>
         <div class="pool-meta">${esc(p.bu||"")} ${esc(p.ji||"")} · ${esc(p.type||"")} ${esc(p.gender||"")}${p.day?` · 참여요일 ${esc(p.day)}`:""}</div>
       </div>
-      <div class="pool-phone">${esc(p.phone||"")}</div>
+      <div class="pool-phone">${phoneLinkHtml_(p.phone,true)}</div>
     </div>`;
   }).join("")||'<div class="empty-hint" style="padding:14px 2px;">검색 결과가 없습니다.</div>';
   const selCountEl=$("poolSelCount");if(selCountEl)selCountEl.textContent=e.poolSelected.length?`${e.poolSelected.length}명 선택됨`:"";
@@ -2459,11 +2440,12 @@ function collectSlotKeys_(group){
 function pushUnique_(arr,name){ if(!arr.includes(name))arr.push(name); }
 function cleanName_(name){ return String(name||"").trim()||"(이름없음)"; }
 // 전화번호를 누르면 문자 앱이 열리도록. PC에서는 문자 앱이 안 열릴 수 있어 번호를 클립보드에도 같이 복사한다.
-function phoneLinkHtml_(phone){
+function phoneLinkHtml_(phone,stopClick){
   if(!phone)return "";
   const digits=String(phone).replace(/[^\d+]/g,"");
   const safe=esc(phone).replace(/'/g,"&#39;");
-  return `<a class="app-phone" href="sms:${digits}" onclick="copyText('${safe}')">${esc(phone)}</a>`;
+  const stop=stopClick?"event.stopPropagation();":"";
+  return `<a class="app-phone" href="sms:${digits}" onclick="${stop}copyText('${safe}')">${esc(phone)}</a>`;
 }
 function buildRecruitSummary_(apps){
   const ov=ensureOverrides_();
@@ -3077,54 +3059,38 @@ function toggleStepDone(stage,id,evt){
   if(stage==="prep")renderPrepTimeline();else if(stage==="run")renderRunTimeline();else renderEvalTimeline();
 }
 
-let prepSegment="material";
-function prepGroupsData(){
+function prepStepsFlat(){
   const e=E();
   const buyStat=(()=>{const items=allBuyItems();const checked=e.buyChecked||{};const total=items.length;const left=items.filter(it=>!checked[buyKey(it)]).length;return {left,total};})();
   const poolCnt=ensureVolunteerPool().length;
   const selCnt=(e.poolSelected||[]).length;
   return [
-    {key:"material",label:"재료",steps:[
-      {id:"pantry",title:"주방 재고 확인",desc:"지난 행사에서 남은 재료를 먼저 반영해두세요.",tab:"pantry"},
-      {id:"calc",title:"재료 계산",desc:`공양 ${e.calcCount||50}명 기준으로 재료량이 계산됩니다.`,tab:"calc"},
-      {id:"buy",title:"구매 목록",desc:buyStat.total?`${buyStat.left} / ${buyStat.total} 남음 — 구매처별로 나눠 체크하세요.`:"재료 계산을 먼저 확인해주세요.",tab:"buy"},
-    ]},
-    {key:"promo",label:"홍보",steps:[
-      {id:"pool",title:"바라지 인력풀",desc:`${poolCnt}명의 인력풀${selCnt?` · ${selCnt}명 선택됨`:""} — 연락 돌릴 분들을 골라두세요.`,tab:"pool"},
-      {id:"promo",title:"바라지 홍보 웹자보",desc:"신청앱 주소를 확인하고 열어볼 수 있습니다.",extraId:"ex-promo",
-        extra:`<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:10px">아래 주소가 실제로 배포된 신청 페이지입니다. 이 주소를 그대로 공유하시면 됩니다.</div>
-        <div class="promo-url-box">${esc(PROMO_APP_URL)}</div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-line" style="flex:1;justify-content:center" onclick="copyText('${PROMO_APP_URL}')">주소 복사</button>
-          <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="window.open('${PROMO_APP_URL}','_blank')">열어보기</button>
-        </div>`},
-      {id:"recruitcheck",title:"모집 현황 파악",desc:"신청현황을 모아서 보여줍니다.",tab:"applications"},
-    ]},
-    {key:"comm",label:"소통",steps:[
-      {id:"telegram",title:"행사 소통방 개설",desc:"텔레그램 그룹방을 만드세요.",ext:"외부 진행"},
-      {id:"notice",title:"소통방에 공지하기",desc:"공지했으면 체크해두세요.",extraId:"ex-notice-check",extra:commsChecklistHtml("notice")},
-      {id:"coord",title:"꼭지들과 소통하기",desc:"다른 꼭지들과 공유·확인할 것들입니다.",extraId:"ex-coord-check",extra:commsChecklistHtml("coord")},
-    ]},
+    {substage:"재료"},
+    {id:"pantry",title:"주방 재고 확인",desc:"지난 행사에서 남은 재료를 먼저 반영해두세요.",tab:"pantry"},
+    {id:"calc",title:"재료 계산",desc:`공양 ${e.calcCount||50}명 기준으로 재료량이 계산됩니다.`,tab:"calc"},
+    {id:"buy",title:"구매 목록",desc:buyStat.total?`${buyStat.left} / ${buyStat.total} 남음 — 구매처별로 나눠 체크하세요.`:"재료 계산을 먼저 확인해주세요.",tab:"buy"},
+    {substage:"홍보"},
+    {id:"pool",title:"바라지 인력풀",desc:`${poolCnt}명의 인력풀${selCnt?` · ${selCnt}명 선택됨`:""} — 연락 돌릴 분들을 골라두세요.`,tab:"pool"},
+    {id:"promo",title:"바라지 홍보 웹자보",desc:"신청앱 주소를 확인하고 열어볼 수 있습니다.",extraId:"ex-promo",
+      extra:`<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:10px">아래 주소가 실제로 배포된 신청 페이지입니다. 이 주소를 그대로 공유하시면 됩니다.</div>
+      <div class="promo-url-box">${esc(PROMO_APP_URL)}</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-line" style="flex:1;justify-content:center" onclick="copyText('${PROMO_APP_URL}')">주소 복사</button>
+        <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="window.open('${PROMO_APP_URL}','_blank')">열어보기</button>
+      </div>`},
+    {id:"recruitcheck",title:"모집 현황 파악",desc:"신청현황을 모아서 보여줍니다.",tab:"applications"},
+    {substage:"소통"},
+    {id:"telegram",title:"행사 소통방 개설",desc:"텔레그램 그룹방을 만드세요.",ext:"외부 진행"},
+    {id:"notice",title:"소통방에 공지하기",desc:"공지했으면 체크해두세요.",extraId:"ex-notice-check",extra:commsChecklistHtml("notice")},
+    {id:"coord",title:"꼭지들과 소통하기",desc:"다른 꼭지들과 공유·확인할 것들입니다.",extraId:"ex-coord-check",extra:commsChecklistHtml("coord")},
   ];
 }
-function prepGroupProgress(g){
-  const e=E();const prog=ensureStageProgress(e).prep||{};
-  const done=g.steps.filter(s=>prog[s.id]).length;
-  return {done,tot:g.steps.length};
-}
-function selectPrepSegment(key){prepSegment=key;renderPrepTimeline();}
 function renderPrepTimeline(){
   const el=$("prepTimeline");if(!el)return;
   const e=E();if(!e){el.innerHTML="";return;}
   const infoStep=[{id:"info",title:"기초 정보 확인",highlight:true,desc:`${esc(e.name)} · ${e.ctx.date||"일정 미정"} · ${kindLabel_(e.kind)} · 총 ${e.ctx.count||0}명`,extraId:"ex-info",
     extra:`<button class="btn btn-line btn-sm" onclick="openWizard(false,true)">이름·일정·인원 수정하기</button>`}];
-  const groups=prepGroupsData();
-  const segHtml=`<div class="prep-segments">`+groups.map(g=>{
-    const p=prepGroupProgress(g);
-    return `<button class="prep-seg-btn ${prepSegment===g.key?'active':''}" onclick="selectPrepSegment('${g.key}')">${esc(g.label)} ${p.done}/${p.tot}</button>`;
-  }).join("")+`</div>`;
-  const active=groups.find(g=>g.key===prepSegment)||groups[0];
-  el.innerHTML=timelineHtml("prep",infoStep)+segHtml+timelineHtml("prep",active.steps);
+  el.innerHTML=timelineHtml("prep",infoStep)+timelineHtml("prep",prepStepsFlat());
   el.querySelectorAll(".flow-step-extra:not(.hidden) textarea").forEach(autoGrowTA);
 }
 function renderRunTimeline(){
@@ -3158,10 +3124,10 @@ function renderEvalTimeline(){
       <button class="btn btn-gold btn-sm" style="margin-top:8px" onclick="copyEvalReflection()">복사하기</button>`},
     {id:"photo",title:"활동 사진 공유",desc:"바라지 활동 중 찍은 사진을 소통방에 올려주세요. (이 앱에는 사진을 올리지 않습니다)"},
     {id:"survey",title:"평가 설문 공유",desc:"구글폼 설문 링크를 저장해두고 복사해 쓰세요.",extraId:"ex-survey",
-      extra:`<input type="text" id="evalSurveyInput" placeholder="설문 링크 붙여넣기" value="${esc(e.evalLinks.survey||"")}" style="width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:9px 11px;font-size:13.5px;" onchange="E().evalLinks.survey=this.value;save();">
+      extra:`<input type="text" id="evalSurveyInput" placeholder="설문 링크 붙여넣기" value="${esc(e.evalLinks.survey||"")}" class="inline-input" onchange="E().evalLinks.survey=this.value;save();">
       <button class="btn btn-line btn-sm" style="margin-top:8px" onclick="copyLink('evalSurveyInput')">복사하기</button>`},
     {id:"next",title:"다음 바라지 신청 링크 공유",desc:"다음 행사 신청 링크를 저장해두고 복사해 쓰세요.",extraId:"ex-next",
-      extra:`<input type="text" id="evalNextInput" placeholder="다음 신청 링크 붙여넣기" value="${esc(e.evalLinks.nextForm||"")}" style="width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:9px 11px;font-size:13.5px;" onchange="E().evalLinks.nextForm=this.value;save();">
+      extra:`<input type="text" id="evalNextInput" placeholder="다음 신청 링크 붙여넣기" value="${esc(e.evalLinks.nextForm||"")}" class="inline-input" onchange="E().evalLinks.nextForm=this.value;save();">
       <button class="btn btn-line btn-sm" style="margin-top:8px" onclick="copyLink('evalNextInput')">복사하기</button>`},
     {substage:"개인작업"},
     {id:"receipt",title:"이번 행사 정산",desc:receiptSub?`${receiptSub.toLocaleString('ko-KR')}원 입력됨`:"아직 미입력",tab:"receipt"},
