@@ -664,6 +664,8 @@
       <button class="btn btn-line" onclick="addPoolPerson()" style="flex:1">＋ 한 명 추가</button>
       <button class="btn btn-line" onclick="bulkAddPoolPeople()" style="flex:1;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><path d="M9 12h6M9 16h6"/></svg>여러 명 붙여넣기</button>
     </div>
+    <button class="btn btn-gold" onclick="importPoolFromApplications()" style="width:100%;margin-top:8px;justify-content:center">신청자 명단에서 불러오기</button>
+    <div class="section-desc" style="margin-top:6px">지금까지 신청앱으로 들어온 분들 중, 인력풀에 아직 없는 분만 골라서 한 번에 추가합니다. (전화번호가 같으면 이미 있는 분으로 봅니다)</div>
     <button class="btn btn-line" onclick="clearVolunteerPool()" style="width:100%;margin-top:8px;justify-content:center;color:var(--danger);border-color:var(--danger)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>인력풀 전체 비우기 (클라우드도 함께 초기화)</button>
     <div id="poolBulkBox" style="display:none;margin-top:10px">
       <div class="section-desc" style="margin-bottom:6px">한 줄에 한 명씩, 이름/전화/부/지/유형/성별/참여요일 순서로 쉼표(,)나 탭으로 구분해 붙여넣으세요. 이름만 있어도 됩니다. 참여요일이 여러 개면 가운데점(·)으로 이어주세요. (예: 홍길동,010-1234-5678,서울제주,강남,일반,여,목·금)</div>
@@ -2202,6 +2204,57 @@ function togglePoolSelect(key){
   const i=e.poolSelected.indexOf(key);
   if(i>=0)e.poolSelected.splice(i,1);else e.poolSelected.push(key);
   save();renderPool();
+}
+// 신청앱으로 들어온 신청자 중 인력풀에 아직 없는 분만 골라서 추가 (전화번호로 중복 판단)
+function normPhone_(p){ return String(p||"").replace(/\D/g,""); }
+// 숫자만 남은 번호를 000-0000-0000 형식으로 통일 (서울 지역번호 02 등은 자릿수가 달라 따로 처리)
+function formatPhone_(raw){
+  const d=normPhone_(raw);
+  if(d.length===11)return `${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}`;
+  if(d.length===10)return d.startsWith("02")?`${d.slice(0,2)}-${d.slice(2,6)}-${d.slice(6)}`:`${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
+  if(d.length===9&&d.startsWith("02"))return `${d.slice(0,2)}-${d.slice(2,5)}-${d.slice(5)}`;
+  return raw; // 자릿수가 흔치 않은 형식은 원본 그대로 둔다(임의로 잘못 자르지 않도록)
+}
+async function importPoolFromApplications(){
+  const pw=getAppPw_();
+  if(!pw){ showToast("모집현황 비밀번호가 필요합니다"); return; }
+  showToast("신청자 명단을 불러오는 중…");
+  let apps=[];
+  try{
+    const res=await fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"});
+    const text=await res.text();
+    if(text==="UNAUTHORIZED"){ resetAppPw_(); showToast("비밀번호가 맞지 않습니다"); return; }
+    const json=JSON.parse(text);
+    if(!json.ok)throw new Error("NOTREADY");
+    apps=json.data||[];
+  }catch(e){ showToast("신청자 명단을 불러오지 못했습니다"); return; }
+
+  const pool=ensureVolunteerPool();
+  const havePhones=new Set(pool.map(p=>normPhone_(p.phone)).filter(Boolean));
+  const seen=new Set();
+  const candidates=[];
+  apps.forEach(a=>{
+    const name=cleanName_(a.name);
+    const ph=normPhone_(a.phone);
+    if(!ph){ return; } // 전화번호로 중복을 가리므로, 번호 없는 신청은 자동 추가하지 않는다
+    if(havePhones.has(ph)||seen.has(ph))return;
+    seen.add(ph);
+    const days=[...new Set(applicationDays_(a))].join("·");
+    candidates.push({name,phone:formatPhone_(a.phone),bu:a.bu||"",ji:a.ji||"",type:a.memberType||"",gender:a.gender||"",day:days});
+  });
+
+  const noPhone=apps.filter(a=>!normPhone_(a.phone)).length;
+  if(!candidates.length){
+    showToast(noPhone?`새로 추가할 분이 없습니다 (번호 없는 신청 ${noPhone}건 제외)`:"이미 모두 인력풀에 있습니다");
+    return;
+  }
+  const preview=candidates.slice(0,10).map(c=>`· ${c.name} ${c.phone}`).join("\n");
+  const more=candidates.length>10?`\n… 외 ${candidates.length-10}명`:"";
+  const extraNote=noPhone?`\n\n(전화번호가 없는 신청 ${noPhone}건은 제외했습니다)`:"";
+  if(!confirm(`인력풀에 없는 분 ${candidates.length}명을 찾았습니다.\n\n${preview}${more}${extraNote}\n\n추가할까요?`))return;
+  candidates.forEach(c=>pool.unshift(c));
+  save();renderPool();
+  showToast(`${candidates.length}명 추가했습니다`);
 }
 function addPoolPerson(){
   const name=prompt("이름을 적어주세요");if(!name||!name.trim())return;
