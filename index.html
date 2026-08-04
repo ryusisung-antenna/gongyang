@@ -1730,7 +1730,21 @@ function setPantryUnit(name,unit){
 }
 
 /* ===== 구매 목록 (합산 + 구입처 배분) ===== */
+let _buyCache={key:null,val:null};
+function buyCacheKey_(){
+  const e=E();if(!e)return "none";
+  // 계산에 영향을 주는 것들이 바뀌었을 때만 다시 계산한다
+  return [STORE.active,e.kind,e.calcCount,JSON.stringify(e.amounts||{}),JSON.stringify(STORE.pantry||{})].join("|");
+}
+function invalidateBuyCache(){ _buyCache={key:null,val:null}; }
 function computeBuyList(){
+  const ck=buyCacheKey_();
+  if(_buyCache.key===ck && _buyCache.val) return _buyCache.val;
+  const val=computeBuyListRaw_();
+  _buyCache={key:ck,val:val};
+  return val;
+}
+function computeBuyListRaw_(){
   // 끼니(slot)별로 묶어서, 각 slot 안에서 품목 합산 후 그 slot 재고를 차감
   const e=E();const meals=menuFor(e.kind);const ratio=(+e.calcCount||50)/50;
   const bySlot={}; // slot → {품목|단위: {name,unit,qty}}
@@ -2265,14 +2279,22 @@ async function loadApplications(){
   box.innerHTML=`<div class="hint-banner">불러오는 중입니다…</div>`;
   try{
     const pw=getAppPw_();
-    const [schedRes,appRes]=await Promise.all([
+    // 세 요청을 한꺼번에 동시에 보낸다 — 하나씩 순서대로 기다리면 구글 앱스크립트 특성상 몇 배 더 걸린다
+    const [schedRes,appRes,ovRes]=await Promise.all([
       fetch(APPSSCRIPTURL+"?t="+Date.now(),{cache:"no-store"}),
-      fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"})
+      fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"}),
+      fetch(APPSSCRIPTURL+"?action=getRecruitOverrides&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"})
     ]);
     try{
       const schedJson=await schedRes.json();
       EVENT_SCHEDULES=(schedJson.data&&schedJson.data.schedules)||[];
     }catch(e){ EVENT_SCHEDULES=[]; }
+    try{
+      const ovText=await ovRes.text();
+      if(ovText==="UNAUTHORIZED"){ RECRUIT_OVERRIDES={removed:{},added:{}}; }
+      else{ const ovJson=JSON.parse(ovText); RECRUIT_OVERRIDES=(ovJson.ok&&ovJson.data)?ovJson.data:{removed:{},added:{}}; }
+      ensureOverrides_();
+    }catch(e){ RECRUIT_OVERRIDES={removed:{},added:{}}; }
     const text=await appRes.text();
     if(text==="UNAUTHORIZED"){
       resetAppPw_();
@@ -2283,7 +2305,6 @@ async function loadApplications(){
     try{json=JSON.parse(text);}catch(e){throw new Error("PARSE");}
     if(!json.ok)throw new Error(json.error||"NOTREADY");
     APPLICATIONS=json.data||[];
-    await loadRecruitOverrides_(); // 배치 조정도 공용 저장소에서 함께 불러온다
     appLoaded=true;
     box.innerHTML="";
     body.style.display="block";
