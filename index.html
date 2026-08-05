@@ -2334,7 +2334,7 @@ async function loadApplications(){
     const pw=getAppPw_();
     // 세 요청을 한꺼번에 동시에 보낸다 — 하나씩 순서대로 기다리면 구글 앱스크립트 특성상 몇 배 더 걸린다
     const [schedRes,appRes,ovRes]=await Promise.all([
-      fetch(APPSSCRIPTURL+"?t="+Date.now(),{cache:"no-store"}),
+      fetch(APPSSCRIPTURL+"?action=getSchedules&t="+Date.now(),{cache:"no-store"}),
       fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"}),
       fetch(APPSSCRIPTURL+"?action=getRecruitOverrides&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"})
     ]);
