@@ -3231,6 +3231,22 @@ function copyLink(id){
 /* ===== 클라우드 동기화 (Google Apps Script) ===== */
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbybTlwXiotibUUWi5Bmab2jAo5MeBZSt3tWH-kN7AClZ46oNaLEjj4FEt6TrBeAwMw/exec";
 
+/* 백엔드가 돌려주는 모양이 두 가지입니다.
+   - 예전: STORE를 그대로 ({events:[...], ...})
+   - 지금: 감싸서 ({ok:true, data:{events:[...]}, updatedAt:...})
+   어느 쪽이 와도 STORE를 꺼낼 수 있게 여기서 한 번 풀어줍니다.
+   (저장할 때 pw·t 같은 값이 같이 섞여 들어간 경우도 events만 제대로 있으면 그대로 씁니다) */
+function unwrapCloud_(text){
+  if(!text||!text.trim())return null;
+  let s;
+  try{ s=JSON.parse(text); }catch(e){ return null; }
+  if(!s||typeof s!=="object")return null;
+  if(s.events&&s.events.length)return s;                 // 예전 모양
+  if(s.data&&s.data.events&&s.data.events.length)return s.data; // 지금 모양
+  if(s.ok===false)return null;
+  return null;
+}
+
 /* ===== 접속 비밀번호 (이 기기에만 저장됨. 소스코드엔 절대 남지 않음) ===== */
 function getCloudPw_(){
   let pw=localStorage.getItem("gongyang_pw");
@@ -3293,8 +3309,8 @@ async function autoLoadOnOpen(force){
     const text=await res.text();
     if(text==="UNAUTHORIZED"){handleUnauthorized_();return;}
     if(text&&text.trim()){
-      const s=JSON.parse(text);
-      if(s.events&&s.events.length){
+      const s=unwrapCloud_(text);
+      if(s&&s.events&&s.events.length){
         lastKnownCloudEventCount=s.events.length;
         const cur=JSON.stringify(STORE);
         if(JSON.stringify(s)!==cur){
@@ -3366,7 +3382,7 @@ async function cloudSave(){
       if(text&&text.trim()){
         // 방금 올린 것과 이벤트 개수가 맞는지 가볍게 확인
         let ok=true;
-        try{const s=JSON.parse(text);const mine=JSON.parse(payload);ok=(s.events&&mine.events&&s.events.length===mine.events.length);if(s.events)lastKnownCloudEventCount=s.events.length;}catch(e){}
+        try{const s=unwrapCloud_(text);const mine=JSON.parse(payload);ok=!!(s&&s.events&&mine.events&&s.events.length===mine.events.length);if(s&&s.events)lastKnownCloudEventCount=s.events.length;}catch(e){}
         lastSavedPayload=payload;syncReady=true;
         showToast(ok?"☁︎ 클라우드에 저장했습니다":"저장됨 (확인은 불러오기로)");
       }else{
@@ -3389,8 +3405,8 @@ async function cloudLoad(){
     const text=await res.text();
     if(text==="UNAUTHORIZED"){handleUnauthorized_();return;}
     if(!text||!text.trim()){showToast("클라우드가 비어 있습니다 (먼저 PC에서 저장하세요)");return;}
-    const s=JSON.parse(text);
-    if(!s.events||!s.events.length){showToast("클라우드 데이터 형식이 맞지 않습니다");return;}
+    const s=unwrapCloud_(text);
+    if(!s||!s.events||!s.events.length){showToast("클라우드 데이터 형식이 맞지 않습니다");return;}
     STORE=s;if(!STORE.pantry)STORE.pantry={};migratePantry(STORE);STORE.events.forEach(migrateEvent);ensureCommsItems_(STORE);
     STORE.active=Math.min(STORE.active||0,STORE.events.length-1);
     save();selectedPerson=null;moving=null;buySel=[];buyMove=null;renderAll();
