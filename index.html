@@ -2325,45 +2325,65 @@ async function toggleSlotClosed_(ids,closed){
     showToast(closed?"마감 처리했습니다":"마감을 해제했습니다");
   }catch(e){ showToast("실패했습니다 — 네트워크 오류"); }
 }
-async function loadApplications(){
-  const box=$("appStateBox"),body=$("appBody");
-  if(!box)return;
-  body.style.display="none";
-  box.innerHTML=`<div class="hint-banner">불러오는 중입니다…</div>`;
-  try{
-    const pw=getAppPw_();
-    // 세 요청을 한꺼번에 동시에 보낸다 — 하나씩 순서대로 기다리면 구글 앱스크립트 특성상 몇 배 더 걸린다
-    const [schedRes,appRes,ovRes]=await Promise.all([
-      fetch(APPSSCRIPTURL+"?action=getSchedules&t="+Date.now(),{cache:"no-store"}),
-      fetch(APPSSCRIPTURL+"?action=listApplications&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"}),
-      fetch(APPSSCRIPTURL+"?action=getRecruitOverrides&pw="+encodeURIComponent(pw)+"&t="+Date.now(),{cache:"no-store"})
-    ]);
-    try{
-      const schedJson=await schedRes.json();
-      EVENT_SCHEDULES=(schedJson.data&&schedJson.data.schedules)||[];
-    }catch(e){ EVENT_SCHEDULES=[]; }
-    try{
-      const ovText=await ovRes.text();
-      if(ovText==="UNAUTHORIZED"){ RECRUIT_OVERRIDES={removed:{},added:{}}; }
-      else{ const ovJson=JSON.parse(ovText); RECRUIT_OVERRIDES=(ovJson.ok&&ovJson.data)?ovJson.data:{removed:{},added:{}}; }
-      ensureOverrides_();
-    }catch(e){ RECRUIT_OVERRIDES={removed:{},added:{}}; }
-    const text=await appRes.text();
-    if(text==="UNAUTHORIZED"){
-      resetAppPw_();
-      box.innerHTML=`<div class="hint-banner">비밀번호가 틀렸습니다. 다시 시도해주세요.</div><button class="btn btn-line" onclick="loadApplications()" style="margin-top:8px">다시 시도</button>`;
+async function loadApplications() {
+  const box = appStateBox, body = appBody;
+  if (!box) return;
+  body.style.display = 'none';
+  box.innerHTML = '<div class="hint-banner">불러오는 중...</div>';
+  try {
+    const pw = getAppPw();
+
+    // 순차 처리 1: 일정(schedules) 조회
+    try {
+      const schedRes = await fetch(APPSSCRIPTURL + '?action=getSchedules&t=' + Date.now(), { cache: 'no-store' });
+      const schedJson = await schedRes.json();
+      EVENTSCHEDULES = (schedJson.data && schedJson.data.schedules) || [];
+    } catch (e) {
+      EVENTSCHEDULES = [];
+    }
+
+    // 순차 처리 2: 신청 목록 조회 (일정 로딩 완료 후 실행)
+    const appRes = await fetch(
+      APPSSCRIPTURL + '?action=listApplications&pw=' + encodeURIComponent(pw) + '&t=' + Date.now(),
+      { cache: 'no-store' }
+    );
+    const text = await appRes.text();
+    if (text === 'UNAUTHORIZED') {
+      resetAppPw();
+      box.innerHTML = '<div class="hint-banner">인증에 실패했습니다.</div>' +
+        '<button class="btn btn-line" onclick="loadApplications()" style="margin-top:8px">다시 시도</button>';
       return;
     }
     let json;
-    try{json=JSON.parse(text);}catch(e){throw new Error("PARSE");}
-    if(!json.ok)throw new Error(json.error||"NOTREADY");
-    APPLICATIONS=json.data||[];
-    appLoaded=true;
-    box.innerHTML="";
-    body.style.display="block";
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      throw new Error('PARSE');
+    }
+    if (!json.ok) throw new Error(json.error || 'NOTREADY');
+    APPLICATIONS = json.data;
+
+    // 순차 처리 3: 모집 오버라이드 조회 (신청 목록 로딩 완료 후 실행)
+    try {
+      const ovRes = await fetch(
+        APPSSCRIPTURL + '?action=getRecruitOverrides&pw=' + encodeURIComponent(pw) + '&t=' + Date.now(),
+        { cache: 'no-store' }
+      );
+      const ovText = await ovRes.text();
+      const parsedOv = (ovText === 'UNAUTHORIZED') ? null : JSON.parse(ovText);
+      RECRUITOVERRIDES = (parsedOv && parsedOv.ok && parsedOv.data) || { removed: [], added: {} };
+      ensureOverrides();
+    } catch (e) {
+      RECRUITOVERRIDES = { removed: [], added: {} };
+    }
+
+    appLoaded = true;
+    box.innerHTML = '';
+    body.style.display = 'block';
     renderApplications();
-  }catch(e){
-    box.innerHTML=`<div class="hint-banner">신청현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</div><button class="btn btn-line" onclick="loadApplications()" style="margin-top:8px">다시 시도</button>`;
+  } catch (e) {
+    box.innerHTML = '<div class="hint-banner">불러오기에 실패했습니다.</div>' +
+      '<button class="btn btn-line" onclick="loadApplications()" style="margin-top:8px">다시 시도</button>';
   }
 }
 
